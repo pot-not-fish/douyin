@@ -129,5 +129,5 @@ func RetrieveUser(video_id int64) (int64, error) {
 		return 0, err
 	}
 
-	return video.UserId, nil
+	return video.UserID, nil
 }

@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-12 16:30:21
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-23 15:06:44
+ * @LastEditTime: 2024-01-26 17:00:06
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\video_dal\video_redis.go
  */
@@ -116,7 +116,7 @@ func (v *Video) CreateVideoCache() error {
 		return ErrEmptyCoverUrl
 	}
 
-	if v.UserId <= 0 {
+	if v.UserID <= 0 {
 		return ErrInvalidUserId
 	}
 

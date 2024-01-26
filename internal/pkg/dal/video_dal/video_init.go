@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-25 17:18:02
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-23 10:58:37
+ * @LastEditTime: 2024-01-26 17:00:23
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\video_dal\video_init.go
  */
@@ -22,7 +22,7 @@ var (
 type Video struct {
 	gorm.Model
 
-	UserId        int64
+	UserID        int64
 	PlayUrl       string
 	CoverUrl      string
 	Title         string

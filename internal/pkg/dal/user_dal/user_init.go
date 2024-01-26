@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 19:25:53
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-23 10:48:29
+ * @LastEditTime: 2024-01-26 17:08:35
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\user_dal\user_init.go
  */
@@ -40,8 +40,8 @@ type User struct {
 type Relation struct {
 	gorm.Model
 
-	FollowId   int64
-	FollowerId int64
+	FollowID   int64
+	FollowerID int64
 }
 
 /**
@@ -54,8 +54,8 @@ func Init() {
 	var err error
 
 	username := "root" // 使用者名字 如root
-	password := "840231514Xk"
-	host := "159.75.186.106"
+	password := "123456"
+	host := "127.0.0.1"
 	port := 3306
 	dbname := "user" // 数据库名字
 

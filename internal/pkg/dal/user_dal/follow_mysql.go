@@ -15,19 +15,19 @@ func (r *Relation) CreateRelation() error {
 		return ErrNullUserDb
 	}
 
-	if r.FollowId == 0 {
+	if r.FollowID == 0 {
 		return ErrEmptyFollowId
 	}
 
-	if r.FollowerId == 0 {
+	if r.FollowerID == 0 {
 		return ErrEmptyFollowerId
 	}
 
-	if r.FollowId == r.FollowerId {
+	if r.FollowID == r.FollowerID {
 		return ErrInvalidRelation
 	}
 
-	if err = IncRelationCache(r.FollowerId, r.FollowId); err == nil {
+	if err = IncRelationCache(r.FollowerID, r.FollowID); err == nil {
 		go create_relation(r)
 		return nil
 	}
@@ -36,8 +36,8 @@ func (r *Relation) CreateRelation() error {
 		return err
 	}
 	go func() {
-		var follower = User{Model: gorm.Model{ID: uint(r.FollowerId)}}
-		var follow = User{Model: gorm.Model{ID: uint(r.FollowId)}}
+		var follower = User{Model: gorm.Model{ID: uint(r.FollowerID)}}
+		var follow = User{Model: gorm.Model{ID: uint(r.FollowID)}}
 		follower.UpdateUserCache()
 		follow.UpdateUserCache()
 	}()
@@ -53,7 +53,7 @@ func (r *Relation) CreateRelation() error {
  */
 func create_relation(r *Relation) error {
 	return UserDb.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("follow_id = ? AND follower_id = ?", r.FollowId, r.FollowerId).First(r).Error; err == nil {
+		if err := tx.Where("follow_id = ? AND follower_id = ?", r.FollowID, r.FollowerID).First(r).Error; err == nil {
 			return ErrRepeatRelation
 		}
 
@@ -61,11 +61,11 @@ func create_relation(r *Relation) error {
 			return err
 		}
 
-		if err := tx.Model(&User{}).Where("id = ?", r.FollowId).Update("follower_count", gorm.Expr("follower_count + ?", 1)).Error; err != nil {
+		if err := tx.Model(&User{}).Where("id = ?", r.FollowID).Update("follower_count", gorm.Expr("follower_count + ?", 1)).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Model(&User{}).Where("id = ?", r.FollowerId).Update("follow_count", gorm.Expr("follow_count + ?", 1)).Error; err != nil {
+		if err := tx.Model(&User{}).Where("id = ?", r.FollowerID).Update("follow_count", gorm.Expr("follow_count + ?", 1)).Error; err != nil {
 			return err
 		}
 
@@ -86,15 +86,15 @@ func (r *Relation) DeleteRelation() error {
 		return ErrNullUserDb
 	}
 
-	if r.FollowId == 0 {
+	if r.FollowID == 0 {
 		return ErrEmptyFollowId
 	}
 
-	if r.FollowerId == 0 {
+	if r.FollowerID == 0 {
 		return ErrEmptyFollowerId
 	}
 
-	if err = DecRelationCache(r.FollowerId, r.FollowId); err == nil {
+	if err = DecRelationCache(r.FollowerID, r.FollowID); err == nil {
 		go delete_relation(r)
 		return nil
 	}
@@ -103,8 +103,8 @@ func (r *Relation) DeleteRelation() error {
 		return err
 	}
 	go func() {
-		var follower = User{Model: gorm.Model{ID: uint(r.FollowerId)}}
-		var follow = User{Model: gorm.Model{ID: uint(r.FollowId)}}
+		var follower = User{Model: gorm.Model{ID: uint(r.FollowerID)}}
+		var follow = User{Model: gorm.Model{ID: uint(r.FollowID)}}
 		follower.UpdateUserCache()
 		follow.UpdateUserCache()
 	}()
@@ -120,7 +120,7 @@ func (r *Relation) DeleteRelation() error {
  */
 func delete_relation(r *Relation) error {
 	return UserDb.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("follow_id = ? AND follower_id = ?", r.FollowId, r.FollowerId).First(r).Error; err != nil {
+		if err := tx.Where("follow_id = ? AND follower_id = ?", r.FollowID, r.FollowerID).First(r).Error; err != nil {
 			return ErrInvalidRelation
 		}
 
@@ -128,11 +128,11 @@ func delete_relation(r *Relation) error {
 			return err
 		}
 
-		if err := tx.Model(&User{}).Where("id = ?", r.FollowId).Update("follower_count", gorm.Expr("follower_count - ?", 1)).Error; err != nil {
+		if err := tx.Model(&User{}).Where("id = ?", r.FollowID).Update("follower_count", gorm.Expr("follower_count - ?", 1)).Error; err != nil {
 			return err
 		}
 
-		if err := tx.Model(&User{}).Where("id = ?", r.FollowerId).Update("follow_count", gorm.Expr("follow_count - ?", 1)).Error; err != nil {
+		if err := tx.Model(&User{}).Where("id = ?", r.FollowerID).Update("follow_count", gorm.Expr("follow_count - ?", 1)).Error; err != nil {
 			return err
 		}
 
