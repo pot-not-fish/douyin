@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-12 16:30:21
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-21 17:43:15
+ * @LastEditTime: 2024-01-23 15:06:44
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\video_dal\video_redis.go
  */
@@ -95,6 +95,12 @@ func VideoSubscribe(offset int64, limit int64) ([]Video, int64, error) {
 	return videos, offset + limit, nil
 }
 
+/**
+ * @method
+ * @description 在缓存中创建视频信息
+ * @param
+ * @return
+ */
 func (v *Video) CreateVideoCache() error {
 	var err error
 
@@ -155,6 +161,12 @@ func (v *Video) CreateVideoCache() error {
 	return nil
 }
 
+/**
+ * @method
+ * @description 在缓存中查找视频信息
+ * @param
+ * @return
+ */
 func (v *Video) RetrieveVideoCache() error {
 	var err error
 
@@ -207,6 +219,12 @@ func (v *Video) RetrieveVideoCache() error {
 	return nil
 }
 
+/**
+ * @function
+ * @description 用户发布评论后，视频评论数自增1
+ * @param
+ * @return
+ */
 func IncCommentCache(video_id int64) error {
 	var err error
 
@@ -217,6 +235,12 @@ func IncCommentCache(video_id int64) error {
 	return nil
 }
 
+/**
+ * @function
+ * @description 用户删除评论后，视频评论数自减1
+ * @param
+ * @return
+ */
 func DecCommentCache(video_id int64) error {
 	var err error
 
@@ -227,6 +251,12 @@ func DecCommentCache(video_id int64) error {
 	return nil
 }
 
+/**
+ * @function
+ * @description 用户点赞后，视频点赞数自增1
+ * @param
+ * @return
+ */
 func IncFavoriteCache(user_id, video_id int64) error {
 	var err error
 
@@ -237,6 +267,12 @@ func IncFavoriteCache(user_id, video_id int64) error {
 	return nil
 }
 
+/**
+ * @function
+ * @description 用户取消点赞后，视频点赞量自减1
+ * @param
+ * @return
+ */
 func DecFavoriteCache(user_id, video_id int64) error {
 	var err error
 

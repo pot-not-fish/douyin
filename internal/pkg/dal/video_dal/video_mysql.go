@@ -66,6 +66,12 @@ func (video *Video) CreateVideo() error {
 	return nil
 }
 
+/**
+ * @function
+ * @description 通过视频的id查找视频的信息
+ * @param
+ * @return
+ */
 func RetrieveVideos(videoid_list []int64) ([]Video, error) {
 	var videos = make([]Video, 0, 10)
 
@@ -102,6 +108,12 @@ func RetrieveUserVideos(user_id int64) ([]Video, error) {
 	return videos, nil
 }
 
+/**
+ * @function
+ * @description 查找视频所有者的id
+ * @param
+ * @return
+ */
 func RetrieveUser(video_id int64) (int64, error) {
 	var video Video
 

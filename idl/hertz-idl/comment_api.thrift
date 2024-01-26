@@ -2,18 +2,19 @@ namespace go comment_api
 
 include "./user_api.thrift"
 
+// 评论操作接口
 struct CommentActionReq {
-    1: required string token;
-    2: required i64 video_id;
-    3: required i32 action_type;
-    4: optional string comment_text;
-    5: optional i64 comment_id;
+    1: required string token;        // 用户token
+    2: required i64 video_id;        // 视频id
+    3: required i32 action_type;     // 操作码 1-发布评论，2-删除评论
+    4: optional string comment_text; // 评论内容
+    5: optional i64 comment_id;      // 要删除的评论的id
 }
 
 struct CommentActionResp {
-    1: i32 status_code;
-    2: string status_msg;
-    3: Comment comment;
+    1: i32 status_code;   // 状态码，0-成功，其他值-失败
+    2: string status_msg; // 返回状态描述
+    3: Comment comment;   // 返回评论的内容
 }
 
 struct Comment {

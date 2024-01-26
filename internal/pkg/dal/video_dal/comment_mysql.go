@@ -2,6 +2,12 @@ package video_dal
 
 import "gorm.io/gorm"
 
+/**
+ * @method
+ * @description 用户发布评论，创建相应数据库字段
+ * @param
+ * @return
+ */
 func (c *Comment) CreateComment() error {
 	if VideoDb == nil {
 		return ErrNullVideoDb
@@ -45,6 +51,12 @@ func create_comment(c *Comment) error {
 	})
 }
 
+/**
+ * @method
+ * @description 用户删除评论，删除comments表相关字段（软删除）
+ * @param
+ * @return
+ */
 func (c *Comment) DeleteComment() error {
 	if VideoDb == nil {
 		return ErrNullVideoDb
@@ -81,6 +93,12 @@ func delete_comment(c *Comment) error {
 	})
 }
 
+/**
+ * @function
+ * @description 查找视频的相关评论，按照时间顺序返回
+ * @param
+ * @return
+ */
 func RetrieveComment(video_id int64) ([]Comment, error) {
 	if VideoDb == nil {
 		return nil, ErrNullVideoDb
@@ -99,6 +117,12 @@ func RetrieveComment(video_id int64) ([]Comment, error) {
 	return comments, nil
 }
 
+/**
+ * @method
+ * @description 查找视频相关的评论
+ * @param
+ * @return
+ */
 func (v *Video) RetrieveComment() error {
 	if VideoDb == nil {
 		return ErrNullVideoDb

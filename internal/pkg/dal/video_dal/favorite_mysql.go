@@ -46,6 +46,12 @@ func create_favorite(f *Favorite) error {
 	})
 }
 
+/**
+ * @method
+ * @description 取消点赞，删除相应关联（软删除）
+ * @param
+ * @return
+ */
 func (f *Favorite) DeleteFavorite() error {
 	if VideoDb == nil {
 		return ErrNullVideoDb
@@ -84,6 +90,12 @@ func delete_favorite(f *Favorite) error {
 	})
 }
 
+/**
+ * @function
+ * @description 查找用户是否喜欢某个视频
+ * @param
+ * @return
+ */
 func RetrieveFavorite(user_id, video_id int64) (bool, error) {
 	var err error
 
@@ -106,6 +118,12 @@ func RetrieveFavorite(user_id, video_id int64) (bool, error) {
 	return true, nil
 }
 
+/**
+ * @function
+ * @description 查找用户喜欢的所有视频
+ * @param
+ * @return
+ */
 func RetrieveFavoriteVideo(user_id int64) (*[]Video, error) {
 	if VideoDb == nil {
 		return nil, ErrNullVideoDb
