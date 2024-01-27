@@ -7,22 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type Video struct {
-	gorm.Model
-
-	UserID        int64
-	VideoID       int64
-	FavoriteCount int64 `gorm:"default:0"`
-}
-
-type User struct {
-	gorm.Model
-
-	UserID         int64
-	TotalFavorited int64 `gorm:"default:0"`
-	FavoriteCount  int64 `gorm:"default:0"`
-}
-
 type Favorite struct {
 	gorm.Model
 
@@ -51,5 +35,5 @@ func Init() {
 		panic(err)
 	}
 
-	FavoriteDb.AutoMigrate(&Video{}, &User{}, &Favorite{})
+	FavoriteDb.AutoMigrate(&Favorite{})
 }

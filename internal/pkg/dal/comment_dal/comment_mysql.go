@@ -2,8 +2,6 @@ package comment_dal
 
 import (
 	"fmt"
-
-	"gorm.io/gorm"
 )
 
 var (
@@ -21,6 +19,9 @@ var (
 
 	// 无效删除评论，评论不存在
 	ErrInvalidDeleteComment = fmt.Errorf("invalid delete comment")
+
+	// 数据库指针未初始化
+	ErrNullDB = fmt.Errorf("nullptr database")
 )
 
 /**
@@ -31,6 +32,10 @@ var (
  */
 func (c *Comment) CreateComment() error {
 	var err error
+	if CommentDb == nil {
+		return ErrNullDB
+	}
+
 	if c.Content == "" {
 		return ErrEmptyContent
 	}
@@ -43,53 +48,47 @@ func (c *Comment) CreateComment() error {
 		return ErrInvalidVideoID
 	}
 
-	if err = create_comment(c); err != nil {
+	if err = CommentDb.Create(c).Error; err != nil {
 		return err
 	}
 	return nil
-}
-
-func create_comment(c *Comment) error {
-	return CommentDb.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Create(c).Error; err != nil {
-			return err
-		}
-
-		if err := tx.Model(&Video{}).Where("video_id = ?", c.VideoID).Update("comment_count", gorm.Expr("comment_count + ?", 1)).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
 }
 
 func (c *Comment) DeleteComment() error {
 	var err error
+	if CommentDb == nil {
+		return ErrNullDB
+	}
+
 	if c.ID <= 0 {
 		return ErrInvalidCommentID
 	}
 
-	if err = delete_comment(c); err != nil {
+	if err = CommentDb.Where("id = ? AND user_id = ? AND video_id = ?", c.ID, c.UserID, c.VideoID).First(c).Error; err != nil {
+		return ErrInvalidDeleteComment
+	}
+
+	if err = CommentDb.Where("id = ?", c.ID).Unscoped().Delete(c).Error; err != nil {
 		return err
 	}
+
 	return nil
 }
 
-func delete_comment(c *Comment) error {
-	return CommentDb.Transaction(func(tx *gorm.DB) error {
-		// 只能删除自己的评论，指定某个视频的某个评论
-		if err := tx.Where("id = ? AND user_id = ? AND video_id = ?", c.ID, c.UserID, c.VideoID).First(c).Error; err != nil {
-			return ErrInvalidDeleteComment
-		}
+func RetrieveComment(video_id int64) ([]Comment, error) {
+	var err error
+	if CommentDb == nil {
+		return nil, ErrNullDB
+	}
 
-		if err := tx.Where("id = ?", c.ID).Unscoped().Delete(c).Error; err != nil {
-			return err
-		}
+	if video_id <= 0 {
+		return nil, ErrInvalidVideoID
+	}
 
-		if err := tx.Model(&Video{}).Where("video_id = ?", c.VideoID).Update("comment_count", gorm.Expr("comment_count - ?", 1)).Error; err != nil {
-			return err
-		}
+	comments := make([]Comment, 0, 20)
+	if err = CommentDb.Order("created_at desc").Where("video_id = ?", video_id).Error; err != nil {
+		return nil, err
+	}
 
-		return nil
-	})
+	return comments, nil
 }

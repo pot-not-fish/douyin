@@ -7,14 +7,6 @@ import (
 	"gorm.io/gorm"
 )
 
-type User struct {
-	gorm.Model
-
-	UserID        int64
-	FollowCount   int64 `gorm:"default:0"`
-	FollowerCount int64 `gorm:"default:0"`
-}
-
 type Relation struct {
 	gorm.Model
 
@@ -42,5 +34,5 @@ func Init() {
 		panic(err)
 	}
 
-	RelationDb.AutoMigrate(&Relation{}, &User{})
+	RelationDb.AutoMigrate(&Relation{})
 }

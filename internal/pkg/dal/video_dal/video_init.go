@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-25 17:18:02
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-26 17:00:23
+ * @LastEditTime: 2024-01-27 17:02:27
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\video_dal\video_init.go
  */
@@ -26,26 +26,8 @@ type Video struct {
 	PlayUrl       string
 	CoverUrl      string
 	Title         string
-	FavoriteCount int64 `gorm:"default:0"`
 	CommentCount  int64 `gorm:"default:0"`
-
-	Comments []Comment `gorm:"foreignKey:VideoRefer"`
-}
-
-type Favorite struct {
-	gorm.Model
-
-	UserId      int64
-	VideoId     int64
-	VideoUserId int64 // video所对应的user的id
-}
-
-type Comment struct {
-	gorm.Model
-
-	Content    string
-	UserId     int64
-	VideoRefer uint
+	FavoriteCount int64 `gorm:"default:0"`
 }
 
 /**
@@ -71,5 +53,5 @@ func Init() {
 		panic(err)
 	}
 
-	VideoDb.AutoMigrate(&Video{}, &Favorite{}, &Comment{})
+	VideoDb.AutoMigrate(&Video{})
 }

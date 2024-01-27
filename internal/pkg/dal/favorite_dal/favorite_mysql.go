@@ -2,24 +2,34 @@ package favorite_dal
 
 import (
 	"fmt"
-
-	"gorm.io/gorm"
 )
 
 var (
+	// 用户id无效
 	ErrInvalidUserID = fmt.Errorf("invalid user id")
 
+	// 视频id无效
 	ErrInvalidVideoID = fmt.Errorf("invalid video id")
 
+	// 视频所有者的用户id无效
 	ErrInvalidVideoUserID = fmt.Errorf("invalid video user id")
 
+	// 重复点赞
 	ErrRepeatFavorite = fmt.Errorf("repeat favorite")
 
+	// 重复取消点赞
 	ErrRepeatUnFavorite = fmt.Errorf("repeat unfavorite")
+
+	// 数据库指针未初始化
+	ErrNullDB = fmt.Errorf("nullptr database")
 )
 
 func (f *Favorite) CreateFavorite() error {
 	var err error
+	if FavoriteDb == nil {
+		return ErrNullDB
+	}
+
 	if f.UserID <= 0 {
 		return ErrInvalidUserID
 	}
@@ -32,37 +42,23 @@ func (f *Favorite) CreateFavorite() error {
 		return ErrInvalidVideoUserID
 	}
 
-	if err = create_favorite(f); err != nil {
+	if err = FavoriteDb.Where("user_id = ? AND video_id = ?", f.UserID, f.VideoID).First(f).Error; err == nil {
+		return ErrRepeatFavorite
+	}
+
+	if err = FavoriteDb.Create(f).Error; err != nil {
 		return err
 	}
 
 	return nil
 }
 
-func create_favorite(f *Favorite) error {
-	return FavoriteDb.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("user_id = ? AND video_id = ?", f.UserID, f.VideoID).First(f).Error; err == nil {
-			return ErrRepeatFavorite
-		}
-
-		if err := tx.Create(f).Error; err != nil {
-			return err
-		}
-
-		if err := tx.Model(&User{}).Where("user_id = ?", f.UserID).Update("favorite_count", gorm.Expr("favorite_count + ?", 1)).Error; err != nil {
-			return err
-		}
-
-		if err := tx.Model(&User{}).Where("user_id = ?", f.VideoUserID).Update("total_favorited", gorm.Expr("total_favorited - ?", 1)).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
-}
-
 func (f *Favorite) DeleteFavorite() error {
 	var err error
+	if FavoriteDb == nil {
+		return ErrNullDB
+	}
+
 	if f.UserID <= 0 {
 		return ErrInvalidUserID
 	}
@@ -71,31 +67,13 @@ func (f *Favorite) DeleteFavorite() error {
 		return ErrInvalidVideoID
 	}
 
-	if err = delete_favorite(f); err != nil {
+	if err = FavoriteDb.Where("user_id = ? AND video_id = ?", f.UserID, f.VideoID).First(f).Error; err != nil {
+		return ErrRepeatUnFavorite
+	}
+
+	if err = FavoriteDb.Where("user_id = ? AND video_id = ?", f.UserID, f.VideoID).Unscoped().Delete(f).Error; err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func delete_favorite(f *Favorite) error {
-	return FavoriteDb.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("user_id = ? AND video_id = ?", f.UserID, f.VideoID).First(f).Error; err != nil {
-			return ErrRepeatUnFavorite
-		}
-
-		if err := tx.Where("user_id = ? AND video_id = ?", f.UserID, f.VideoID).Unscoped().Delete(f).Error; err != nil {
-			return err
-		}
-
-		if err := tx.Model(&User{}).Where("user_id = ?", f.UserID).Update("favorite_count", gorm.Expr("favorite_count - ?", 1)).Error; err != nil {
-			return err
-		}
-
-		if err := tx.Model(&User{}).Where("user_id = ?", f.VideoUserID).Update("total_favorited", gorm.Expr("total_favorited - ?", 1)).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
 }

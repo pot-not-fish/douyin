@@ -2,22 +2,30 @@ package relation_dal
 
 import (
 	"fmt"
-
-	"gorm.io/gorm"
 )
 
 var (
+	// 关注者的id无效
 	ErrInvalidFollowID = fmt.Errorf("invalid follow id")
 
+	// 粉丝的id无效
 	ErrInvalidFollowerID = fmt.Errorf("invalid follower id")
 
+	// 重复关注
 	ErrRepeatFollow = fmt.Errorf("repeat follow")
 
+	// 重复取消关注
 	ErrRepeatUnFollow = fmt.Errorf("repeat unfollow")
+
+	//数据库指针未初始化
+	ErrNullDB = fmt.Errorf("nullptr database")
 )
 
 func (r *Relation) CreateRelation() error {
 	var err error
+	if RelationDb == nil {
+		return ErrNullDB
+	}
 
 	if r.FollowID <= 0 {
 		return ErrInvalidFollowID
@@ -27,37 +35,23 @@ func (r *Relation) CreateRelation() error {
 		return ErrInvalidFollowerID
 	}
 
-	if err = create_relation(r); err != nil {
+	if err = RelationDb.Where("follow_id = ? AND follower_id = ?", r.FollowID, r.FollowerID).First(r).Error; err == nil {
+		return ErrRepeatFollow
+	}
+
+	if err = RelationDb.Create(r).Error; err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func create_relation(r *Relation) error {
-	return RelationDb.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("follow_id = ? AND follower_id = ?", r.FollowID, r.FollowerID).First(r).Error; err == nil {
-			return ErrRepeatFollow
-		}
-
-		if err := tx.Create(r).Error; err != nil {
-			return err
-		}
-
-		if err := tx.Model(&User{}).Where("user_id = ?", r.FollowerID).Update("follow_count", gorm.Expr("follow_count + ?", 1)).Error; err != nil {
-			return err
-		}
-
-		if err := tx.Model(&User{}).Where("user_id = ?", r.FollowID).Update("follower_count", gorm.Expr("follower_count + ?", 1)).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
 }
 
 func (r *Relation) DeleteRelation() error {
 	var err error
+	if RelationDb == nil {
+		return ErrNullDB
+	}
+
 	if r.FollowID <= 0 {
 		return ErrInvalidFollowID
 	}
@@ -66,31 +60,13 @@ func (r *Relation) DeleteRelation() error {
 		return ErrInvalidFollowerID
 	}
 
-	if err = delete_relation(r); err != nil {
+	if err = RelationDb.Where("follow_id = ? AND follower_id = ?", r.FollowID, r.FollowerID).First(r).Error; err != nil {
+		return ErrRepeatUnFollow
+	}
+
+	if err = RelationDb.Where("follow_id = ? AND follower_id = ?", r.FollowID, r.FollowerID).Unscoped().Delete(r).Error; err != nil {
 		return err
 	}
 
 	return nil
-}
-
-func delete_relation(r *Relation) error {
-	return RelationDb.Transaction(func(tx *gorm.DB) error {
-		if err := tx.Where("follow_id = ? AND follower_id = ?", r.FollowID, r.FollowerID).First(r).Error; err != nil {
-			return ErrRepeatUnFollow
-		}
-
-		if err := tx.Where("follow_id = ? AND follower_id = ?", r.FollowID, r.FollowerID).Unscoped().Delete(r).Error; err != nil {
-			return err
-		}
-
-		if err := tx.Model(&User{}).Where("user_id = ?", r.FollowerID).Update("follow_count", gorm.Expr("follow_count - ?", 1)).Error; err != nil {
-			return err
-		}
-
-		if err := tx.Model(&User{}).Where("user_id = ?", r.FollowID).Update("follower_count", gorm.Expr("follower_count - ?", 1)).Error; err != nil {
-			return err
-		}
-
-		return nil
-	})
 }

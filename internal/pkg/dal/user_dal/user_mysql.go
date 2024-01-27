@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 19:40:46
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-23 10:47:01
+ * @LastEditTime: 2024-01-27 11:10:21
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\user_dal\user_mysql.go
  */
@@ -40,14 +40,6 @@ var (
 
 	// user数据库的指针为空
 	ErrNullUserDb = fmt.Errorf("user's db pointer is null")
-
-	ErrEmptyFollowId = fmt.Errorf("follow id is empty")
-
-	ErrEmptyFollowerId = fmt.Errorf("follower id is empty")
-
-	ErrRepeatRelation = fmt.Errorf("you can not follow or unfollow repeatly")
-
-	ErrInvalidRelation = fmt.Errorf("you can not follow your self")
 )
 
 /**

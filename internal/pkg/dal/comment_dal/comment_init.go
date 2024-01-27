@@ -15,14 +15,6 @@ type Comment struct {
 	VideoID int64
 }
 
-type Video struct {
-	gorm.Model
-
-	UserID       int64
-	VideoID      int64
-	CommentCount int64 `gorm:"default:0"`
-}
-
 var (
 	CommentDb *gorm.DB
 )
@@ -43,5 +35,5 @@ func Init() {
 		panic(err)
 	}
 
-	CommentDb.AutoMigrate(&Video{}, &Comment{})
+	CommentDb.AutoMigrate(&Comment{})
 }
