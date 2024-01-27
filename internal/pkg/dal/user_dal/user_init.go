@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 19:25:53
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-27 16:39:07
+ * @LastEditTime: 2024-01-27 23:18:35
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\user_dal\user_init.go
  */
@@ -25,12 +25,14 @@ type User struct {
 	Name     string
 	Password string
 
-	FollowID   int64
-	FollowerID int64
+	FollowCount   int64
+	FollowerCount int64
 
 	Avatar     string `gorm:"default:https://i2.hdslb.com/bfs/face/9075d1c862aa031471e601aa10a60da678108556.jpg@240w_240h_1c_1s_!web-avatar-search-videos.webp"`
 	Background string `gorm:"default:https://i0.hdslb.com/bfs/space/cb1c3ef50e22b6096fde67febe863494caefebad.png"`
 	Signature  string `gorm:"default:这是一段个性签名"`
+
+	WorkCount int64
 
 	TotalFavorited int64 `gorm:"default:0"`
 	FavoriteCount  int64 `gorm:"default:0"`

@@ -10,9 +10,8 @@ import (
 type Favorite struct {
 	gorm.Model
 
-	UserID      int64
-	VideoID     int64
-	VideoUserID int64 // video所对应的user的id
+	UserID  int64
+	VideoID int64
 }
 
 var (
