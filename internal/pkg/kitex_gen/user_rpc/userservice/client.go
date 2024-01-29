@@ -11,7 +11,8 @@ import (
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
-	Userinfo(ctx context.Context, request *user_rpc.RetriveUserReq, callOptions ...callopt.Option) (r *user_rpc.RetriveUserResp, err error)
+	UserList(ctx context.Context, request *user_rpc.UserListReq, callOptions ...callopt.Option) (r *user_rpc.UserListResp, err error)
+	UserAction(ctx context.Context, request *user_rpc.UserActionReq, callOptions ...callopt.Option) (r *user_rpc.UserActionResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -43,7 +44,12 @@ type kUserServiceClient struct {
 	*kClient
 }
 
-func (p *kUserServiceClient) Userinfo(ctx context.Context, request *user_rpc.RetriveUserReq, callOptions ...callopt.Option) (r *user_rpc.RetriveUserResp, err error) {
+func (p *kUserServiceClient) UserList(ctx context.Context, request *user_rpc.UserListReq, callOptions ...callopt.Option) (r *user_rpc.UserListResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
-	return p.kClient.Userinfo(ctx, request)
+	return p.kClient.UserList(ctx, request)
+}
+
+func (p *kUserServiceClient) UserAction(ctx context.Context, request *user_rpc.UserActionReq, callOptions ...callopt.Option) (r *user_rpc.UserActionResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UserAction(ctx, request)
 }

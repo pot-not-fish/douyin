@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-25 17:23:30
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-21 19:42:38
+ * @LastEditTime: 2024-01-28 12:27:14
  * @Description: 提供了对video数据库封装后的操作函数
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\video_dal\video_mysql.go
  */
@@ -10,6 +10,8 @@ package video_dal
 
 import (
 	"fmt"
+
+	"gorm.io/gorm"
 )
 
 var (
@@ -21,7 +23,7 @@ var (
 
 	ErrInvalidUserId = fmt.Errorf("user id is invalid")
 
-	ErrEmptyVideoId = fmt.Errorf("video id is empty")
+	ErrInvalidVideoId = fmt.Errorf("video id is empty")
 
 	ErrInvalidFavorite = fmt.Errorf("you can't favorite or cancel favorite repeatly")
 
@@ -62,6 +64,8 @@ func (video *Video) CreateVideo() error {
 	if err := VideoDb.Create(&video).Error; err != nil {
 		return err
 	}
+
+	go video.CreateVideoCache()
 
 	return nil
 }
@@ -116,13 +120,12 @@ func RetrieveUserVideos(user_id int64) ([]Video, error) {
  */
 func RetrieveUser(video_id int64) (int64, error) {
 	var video Video
-
 	if VideoDb == nil {
 		return 0, ErrNullVideoDb
 	}
 
 	if video_id == 0 {
-		return 0, ErrEmptyVideoId
+		return 0, ErrInvalidVideoId
 	}
 
 	if err := VideoDb.Where("id = ?", video_id).First(&video).Error; err != nil {
@@ -130,4 +133,93 @@ func RetrieveUser(video_id int64) (int64, error) {
 	}
 
 	return video.UserID, nil
+}
+
+func (video *Video) UpdateUserCache() error {
+	var err error
+	if VideoDb == nil {
+		return ErrNullVideoDb
+	}
+
+	if video.ID <= 0 {
+		return ErrInvalidVideoId
+	}
+
+	if err = VideoDb.Where("id = ?", video.ID).First(video).Error; err != nil {
+		return err
+	}
+
+	if err = video.CreateVideoCache(); err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func IncCommentCount(video_id int64) error {
+	var err error
+	if VideoDb == nil {
+		return ErrNullVideoDb
+	}
+
+	if video_id <= 0 {
+		return ErrInvalidVideoId
+	}
+
+	if err = VideoDb.Model(&Video{}).Where("id = ?", video_id).Update("comment_count", gorm.Expr("comment_count + ?", 1)).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DecCommentCount(video_id int64) error {
+	var err error
+	if VideoDb == nil {
+		return ErrNullVideoDb
+	}
+
+	if video_id <= 0 {
+		return ErrInvalidVideoId
+	}
+
+	if err = VideoDb.Model(&Video{}).Where("id = ?", video_id).Update("comment_count", gorm.Expr("comment_count - ?", 1)).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func IncFavoriteCount(video_id int64) error {
+	var err error
+	if VideoDb == nil {
+		return ErrNullVideoDb
+	}
+
+	if video_id <= 0 {
+		return ErrInvalidVideoId
+	}
+
+	if err = VideoDb.Model(&Video{}).Where("id = ?", video_id).Update("favorite_count", gorm.Expr("favorite_count + ?", 1)).Error; err != nil {
+		return err
+	}
+
+	return nil
+}
+
+func DecFavoriteCount(video_id int64) error {
+	var err error
+	if VideoDb == nil {
+		return ErrNullVideoDb
+	}
+
+	if video_id <= 0 {
+		return ErrInvalidVideoId
+	}
+
+	if err = VideoDb.Model(&Video{}).Where("id = ?", video_id).Update("favorite_count", gorm.Expr("favorite_count - ?", 1)).Error; err != nil {
+		return err
+	}
+
+	return nil
 }

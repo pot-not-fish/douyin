@@ -1,11 +1,6 @@
 namespace go follow_rpc
 
-struct User {
-    1: i64 follow_count;   // 关注总数
-    2: i64 follower_count; // 粉丝总数
-    3: bool is_follow;     // 是否关注 不能关注自己
-}
-
+// 关注操作
 struct RelationActionReq {
     1: i16 action_type; // 1-关注，2-取消关注
     2: i64 user_id;     // 用户id
@@ -17,30 +12,50 @@ struct RelationActionResp {
     2: string msg; // 返回状态描述
 }
 
-struct UserListReq {
-    1: list<i64> userinfo_id; // 需要查找的用户的id
-    2: i64 user_id;           // 用户id 0-未登录
-}
-
-struct UserListResp {
-    1: i16 code;        // 状态码，0-成功，其他值-失败
-    2: string msg;      // 返回状态描述
-    3: list<User> user; // 用户关注信息列表
-}
-
-struct UserActionReq {
+// 是否关注
+struct IsFollowReq {
     1: i64 user_id; // 用户id
+    2: list<i64> follow_id; // 关注者id
 }
 
-struct UserActionResp {
-    1: i16 code;   // 状态码，0-成功，其他值-失败
-    2: string msg; // 返回状态描述
+struct IsFollowResp {
+    1: i16 code;             // 状态码，0-成功，其他值-失败
+    2: string msg;           // 返回状态描述
+    3: list<bool> is_follow; // 是否关注
+}
+
+// 关注列表
+struct FollowListReq {
+    1: i64 user_id;  // 用户id
+    2: i64 owner_id; // 所访问的用户id
+}
+
+struct FollowListResp {
+    1: i16 code;             // 状态码，0-成功，其他值-失败
+    2: string msg;           // 返回状态描述
+    3: list<i64> user_id;    // 访问的用户所关注的用户的id
+    4: list<bool> is_follow; // 是否关注
+}
+
+// 粉丝列表
+struct FollowerListReq {
+    1: i64 user_id;  // 用户id
+    2: i64 owner_id; // 所访问的用户id
+}
+
+struct FollowerListResp {
+    1: i16 code;             // 状态码，0-成功，其他值-失败
+    2: string msg;           // 返回状态描述
+    3: list<i64> user_id;    // 访问的用户的粉丝的id
+    4: list<bool> is_follow; // 是否关注
 }
 
 service FollowService {
     RelationActionResp RelationAction(1: RelationActionReq request);
 
-    UserListResp UserList(1: UserListReq request);
+    IsFollowResp IsFollow(1: IsFollowReq request);
 
-    UserActionResp UserAction(1: UserActionReq request);
+    FollowListResp FollowList(1: FollowListReq request);
+
+    FollowerListResp FollowerList(1: FollowerListReq request);
 }

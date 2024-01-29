@@ -11,7 +11,10 @@ import (
 
 // Client is designed to provide IDL-compatible methods with call-option parameter for kitex framework.
 type Client interface {
+	RelationAction(ctx context.Context, request *follow_rpc.RelationActionReq, callOptions ...callopt.Option) (r *follow_rpc.RelationActionResp, err error)
 	IsFollow(ctx context.Context, request *follow_rpc.IsFollowReq, callOptions ...callopt.Option) (r *follow_rpc.IsFollowResp, err error)
+	FollowList(ctx context.Context, request *follow_rpc.FollowListReq, callOptions ...callopt.Option) (r *follow_rpc.FollowListResp, err error)
+	FollowerList(ctx context.Context, request *follow_rpc.FollowerListReq, callOptions ...callopt.Option) (r *follow_rpc.FollowerListResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -43,7 +46,22 @@ type kFollowServiceClient struct {
 	*kClient
 }
 
+func (p *kFollowServiceClient) RelationAction(ctx context.Context, request *follow_rpc.RelationActionReq, callOptions ...callopt.Option) (r *follow_rpc.RelationActionResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.RelationAction(ctx, request)
+}
+
 func (p *kFollowServiceClient) IsFollow(ctx context.Context, request *follow_rpc.IsFollowReq, callOptions ...callopt.Option) (r *follow_rpc.IsFollowResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.IsFollow(ctx, request)
+}
+
+func (p *kFollowServiceClient) FollowList(ctx context.Context, request *follow_rpc.FollowListReq, callOptions ...callopt.Option) (r *follow_rpc.FollowListResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.FollowList(ctx, request)
+}
+
+func (p *kFollowServiceClient) FollowerList(ctx context.Context, request *follow_rpc.FollowerListReq, callOptions ...callopt.Option) (r *follow_rpc.FollowerListResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.FollowerList(ctx, request)
 }

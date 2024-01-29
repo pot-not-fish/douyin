@@ -19,6 +19,8 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "FavoriteService"
 	handlerType := (*favorite_rpc.FavoriteService)(nil)
 	methods := map[string]kitex.MethodInfo{
+		"FavoriteAction":
+			kitex.NewMethodInfo(favoriteActionHandler, newFavoriteServiceFavoriteActionArgs, newFavoriteServiceFavoriteActionResult, false),
 		"IsFavorite":
 			kitex.NewMethodInfo(isFavoriteHandler, newFavoriteServiceIsFavoriteArgs, newFavoriteServiceIsFavoriteResult, false),
 	}
@@ -37,6 +39,25 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	return svcInfo
 }
 
+
+
+func favoriteActionHandler(ctx context.Context, handler interface{}, arg, result interface{}) error { 
+	realArg := arg.(*favorite_rpc.FavoriteServiceFavoriteActionArgs)
+	realResult := result.(*favorite_rpc.FavoriteServiceFavoriteActionResult)
+	success, err := handler.(favorite_rpc.FavoriteService).FavoriteAction(ctx, realArg.Request)
+	if err != nil {
+	return err
+	}
+	realResult.Success = success
+	return nil 
+}
+func newFavoriteServiceFavoriteActionArgs() interface{} {
+	return favorite_rpc.NewFavoriteServiceFavoriteActionArgs()
+}
+
+func newFavoriteServiceFavoriteActionResult() interface{} {
+	return favorite_rpc.NewFavoriteServiceFavoriteActionResult()
+}
 
 
 func isFavoriteHandler(ctx context.Context, handler interface{}, arg, result interface{}) error { 
@@ -68,6 +89,16 @@ func newServiceClient(c client.Client) *kClient {
 	}
 }
 
+
+func (p *kClient) FavoriteAction(ctx context.Context , request *favorite_rpc.FavoriteActionReq) (r *favorite_rpc.FavoriteActionResp, err error) {
+	var _args favorite_rpc.FavoriteServiceFavoriteActionArgs
+	_args.Request = request
+	var _result favorite_rpc.FavoriteServiceFavoriteActionResult
+	if err = p.c.Call(ctx, "FavoriteAction", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
 
 func (p *kClient) IsFavorite(ctx context.Context , request *favorite_rpc.IsFavoriteReq) (r *favorite_rpc.IsFavoriteResp, err error) {
 	var _args favorite_rpc.FavoriteServiceIsFavoriteArgs

@@ -23,7 +23,7 @@ struct CommentActionResp {
 // 视频评论列表请求
 struct CommentListReq {
     1: i64 video_id; // 视频id
-    1: i64 user_id;  // 用户id 0-未登录
+    2: i64 user_id;  // 用户id 0-未登录
 }
 
 struct CommentListResp {
@@ -32,30 +32,8 @@ struct CommentListResp {
     3: list<Comment> comment; // 返回发布的评论内容
 }
 
-// 视频信息评论数量请求
-struct VideoListReq {
-    1: list<i64> video_id; // 视频id
-}
-
-struct VideoListResp {
-    1: list<i64> comment_count; // 视频评论数量
-}
-
-struct VideoActionReq {
-    1: i64 video_id; // 视频id
-}
-
-struct VideoActionResp {
-    1: i16 code;   // 状态码，0-成功，其他值-失败
-    2: string msg; // 返回状态描述
-}
-
 service CommentService {
     CommentActionResp CommentAction(1: CommentActionReq request);
 
     CommentListResp CommentList(1: CommentListReq request);
-
-    VideoListResp VideoList(1: VideoListReq request);
-
-    VideoActionResp VideoAction(1: VideoActionReq request);
 }

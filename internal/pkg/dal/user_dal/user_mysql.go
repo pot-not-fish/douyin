@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 19:40:46
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-27 11:10:21
+ * @LastEditTime: 2024-01-29 17:53:28
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\user_dal\user_mysql.go
  */
@@ -170,10 +170,8 @@ func (user *User) UpdateUserCache() error {
 	if err != nil {
 		return err
 	}
-	err = user.CreateUserCache()
-	if err != nil {
-		return err
-	}
+
+	go user.CreateUserCache()
 
 	return nil
 }
@@ -279,7 +277,7 @@ func (u *User) IncWorkCount() error {
 func inc_work_count(u *User) error {
 	var err error
 
-	if err = UserDb.Model(&User{}).Where("id = ?", u.ID).Update("work_count", gorm.Expr("work_count + ?", 1)).Error; err != nil {
+	if err = UserDb.Model(u).Where("id = ?", u.ID).Update("work_count", gorm.Expr("work_count + ?", 1)).Error; err != nil {
 		return err
 	}
 
@@ -318,14 +316,6 @@ func IncFavorite(user_id, favorite_id int64) error {
 		user.UpdateUserCache()
 		video_user.UpdateUserCache()
 	}()
-
-	// if err := UserDb.Model(&User{}).Where("id = ?", user_id).Update("favorite_count", gorm.Expr("favorite_count + ?", 1)).Error; err != nil {
-	// 	return err
-	// }
-
-	// if err := UserDb.Model(&User{}).Where("id = ?", favorite_id).Update("total_favorited", gorm.Expr("total_favorited + ?", 1)).Error; err != nil {
-	// 	return err
-	// }
 
 	return nil
 }
@@ -376,14 +366,6 @@ func DecFavorite(user_id, favorite_id int64) error {
 		user.UpdateUserCache()
 		video_user.UpdateUserCache()
 	}()
-
-	// if err := UserDb.Model(&User{}).Where("id = ?", user_id).Update("favorite_count", gorm.Expr("favorite_count - ?", 1)).Error; err != nil {
-	// 	return err
-	// }
-
-	// if err := UserDb.Model(&User{}).Where("id = ?", favorite_id).Update("total_favorited", gorm.Expr("total_favorited - ?", 1)).Error; err != nil {
-	// 	return err
-	// }
 
 	return nil
 }
