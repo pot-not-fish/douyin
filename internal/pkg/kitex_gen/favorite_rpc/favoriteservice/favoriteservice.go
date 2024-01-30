@@ -23,6 +23,8 @@ func NewServiceInfo() *kitex.ServiceInfo {
 			kitex.NewMethodInfo(favoriteActionHandler, newFavoriteServiceFavoriteActionArgs, newFavoriteServiceFavoriteActionResult, false),
 		"IsFavorite":
 			kitex.NewMethodInfo(isFavoriteHandler, newFavoriteServiceIsFavoriteArgs, newFavoriteServiceIsFavoriteResult, false),
+		"FavoriteVideo":
+			kitex.NewMethodInfo(favoriteVideoHandler, newFavoriteServiceFavoriteVideoArgs, newFavoriteServiceFavoriteVideoResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":	 "favorite_rpc",
@@ -79,6 +81,25 @@ func newFavoriteServiceIsFavoriteResult() interface{} {
 }
 
 
+func favoriteVideoHandler(ctx context.Context, handler interface{}, arg, result interface{}) error { 
+	realArg := arg.(*favorite_rpc.FavoriteServiceFavoriteVideoArgs)
+	realResult := result.(*favorite_rpc.FavoriteServiceFavoriteVideoResult)
+	success, err := handler.(favorite_rpc.FavoriteService).FavoriteVideo(ctx, realArg.Request)
+	if err != nil {
+	return err
+	}
+	realResult.Success = success
+	return nil 
+}
+func newFavoriteServiceFavoriteVideoArgs() interface{} {
+	return favorite_rpc.NewFavoriteServiceFavoriteVideoArgs()
+}
+
+func newFavoriteServiceFavoriteVideoResult() interface{} {
+	return favorite_rpc.NewFavoriteServiceFavoriteVideoResult()
+}
+
+
 type kClient struct {
 	c client.Client
 }
@@ -105,6 +126,16 @@ func (p *kClient) IsFavorite(ctx context.Context , request *favorite_rpc.IsFavor
 	_args.Request = request
 	var _result favorite_rpc.FavoriteServiceIsFavoriteResult
 	if err = p.c.Call(ctx, "IsFavorite", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) FavoriteVideo(ctx context.Context , request *favorite_rpc.FavoriteVideoReq) (r *favorite_rpc.FavoriteVideoResp, err error) {
+	var _args favorite_rpc.FavoriteServiceFavoriteVideoArgs
+	_args.Request = request
+	var _result favorite_rpc.FavoriteServiceFavoriteVideoResult
+	if err = p.c.Call(ctx, "FavoriteVideo", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

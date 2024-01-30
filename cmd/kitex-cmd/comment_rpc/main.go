@@ -1,18 +1,8 @@
-/*
- * @Author: LIKE_A_STAR
- * @Date: 2023-11-13 10:36:48
- * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-30 14:43:59
- * @Description:
- * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\cmd\kitex-cmd\user_rpc\main.go
- */
 package main
 
 import (
-	"douyin/internal/kitex-server/user_handler"
-	"douyin/internal/pkg/dal"
-	"douyin/internal/pkg/dal/user_dal"
-	"douyin/internal/pkg/kitex_gen/user_rpc/userservice"
+	"douyin/internal/kitex-server/comment_handler"
+	"douyin/internal/pkg/kitex_gen/comment_rpc/commentservice"
 	"log"
 	"net"
 	"time"
@@ -23,19 +13,16 @@ import (
 )
 
 func main() {
-	user_dal.Init()
-	dal.InitRedis()
-
 	r, err := etcd.NewEtcdRegistry([]string{"127.0.0.1:2379"})
 	if err != nil {
 		log.Println(err.Error())
 	}
 
-	addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:8885")
-	svr := userservice.NewServer(
-		new(user_handler.UserServiceImpl),
+	addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:8887")
+	svr := commentservice.NewServer(
+		new(comment_handler.CommentServiceImpl),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
-			ServiceName: "user",
+			ServiceName: "isfavorite",
 		}),
 		server.WithRegistry(r),
 		server.WithServiceAddr(addr),

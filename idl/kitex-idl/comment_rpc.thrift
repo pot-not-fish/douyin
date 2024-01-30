@@ -9,8 +9,8 @@ struct Comment {
 // 评论操作请求
 struct CommentActionReq {
     1: i16 action_type;              // 1-评论，2-删除评论
-    2: string user_id;               // 用户id
-    3: string video_id;              // 视频id
+    2: i64 user_id;                  // 用户id
+    3: i64 video_id;                 // 视频id
     4: optional string comment_text; // 评论内容
 }
 
@@ -23,7 +23,6 @@ struct CommentActionResp {
 // 视频评论列表请求
 struct CommentListReq {
     1: i64 video_id; // 视频id
-    2: i64 user_id;  // 用户id 0-未登录
 }
 
 struct CommentListResp {

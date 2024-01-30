@@ -7,10 +7,7 @@ import (
 )
 
 func IsFollowRpc(ctx context.Context, user_id_list, to_user_id_list []int64) ([]bool, error) {
-	respRpc, err := followClient.IsFollow(ctx, &follow_rpc.IsFollowReq{
-		FromUserId: user_id_list,
-		ToUserId:   to_user_id_list,
-	})
+	respRpc, err := followClient.IsFollow(ctx, &follow_rpc.IsFollowReq{})
 	if err != nil {
 		return nil, err
 	}

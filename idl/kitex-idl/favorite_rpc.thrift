@@ -41,4 +41,6 @@ service FavoriteService {
     FavoriteActionResp FavoriteAction(1: FavoriteActionReq request);
 
     IsFavoriteResp IsFavorite(1: IsFavoriteReq request);
+
+    FavoriteVideoResp FavoriteVideo(1: FavoriteVideoReq request);
 }

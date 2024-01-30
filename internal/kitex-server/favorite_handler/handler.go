@@ -2,30 +2,62 @@ package favorite_handler
 
 import (
 	"context"
-	"douyin/internal/pkg/dal/video_dal"
+	"douyin/internal/pkg/dal/favorite_dal"
 	"douyin/internal/pkg/kitex_gen/favorite_rpc"
 )
 
 type FavoriteServiceImpl struct{}
 
-func (s *FavoriteServiceImpl) IsFavorite(ctx context.Context, request *favorite_rpc.IsFavoriteReq) (resp *favorite_rpc.IsFavoriteResp, err error) {
-	isfavorite_list := make([]bool, 0, len(request.VideoId))
+func (f *FavoriteServiceImpl) FavoriteAction(ctx context.Context, request *favorite_rpc.FavoriteActionReq) (*favorite_rpc.FavoriteActionResp, error) {
+	var err error
+	resp := new(favorite_rpc.FavoriteActionResp)
 
-	for k, v := range request.UserId {
-		favorite, err := video_dal.RetrieveFavorite(v, request.VideoId[k])
-		if err != nil {
-			return &favorite_rpc.IsFavoriteResp{
-				StatusCode: 1,
-				StatusMsg:  err.Error(),
-			}, nil
+	favorite := favorite_dal.Favorite{
+		UserID:  request.UserId,
+		VideoID: request.VideoId,
+	}
+	switch request.ActionType {
+	case 1:
+		if err = favorite.CreateFavorite(); err != nil {
+			resp.Code = 1
+			resp.Msg = err.Error()
+			return resp, nil
 		}
-
-		isfavorite_list = append(isfavorite_list, favorite)
+	case 2:
+		if err = favorite.CreateFavorite(); err != nil {
+			resp.Code = 1
+			resp.Msg = err.Error()
+			return resp, nil
+		}
+	default:
+		resp.Code = 1
+		resp.Msg = "invalid action type"
+		return resp, nil
 	}
 
-	return &favorite_rpc.IsFavoriteResp{
-		StatusCode: 0,
-		StatusMsg:  "OK",
-		IsFavorite: isfavorite_list,
-	}, nil
+	resp.Code = 0
+	resp.Msg = "ok"
+	return resp, nil
+}
+
+func (f *FavoriteServiceImpl) IsFavorite(ctx context.Context, request *favorite_rpc.IsFavoriteReq) (*favorite_rpc.IsFavoriteResp, error) {
+	resp := new(favorite_rpc.IsFavoriteResp)
+
+	is_favorite_list, err := favorite_dal.IsFavorite(request.UserId, request.VideoId)
+	if err != nil {
+		resp.Code = 1
+		resp.Msg = err.Error()
+		return resp, nil
+	}
+
+	resp.IsFavorite = is_favorite_list
+	resp.Code = 0
+	resp.Msg = "ok"
+	return resp, nil
+}
+
+func (f *FavoriteServiceImpl) FavoriteVideo(ctx context.Context, request *favorite_rpc.FavoriteVideoReq) (*favorite_rpc.FavoriteVideoResp, error) {
+	resp := new(favorite_rpc.FavoriteVideoResp)
+
+	return resp, nil
 }

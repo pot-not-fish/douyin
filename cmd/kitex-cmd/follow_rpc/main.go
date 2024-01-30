@@ -27,7 +27,7 @@ func main() {
 	svr := followservice.NewServer(
 		new(follow_handler.FollowServiceImpl),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
-			ServiceName: "isfollow",
+			ServiceName: "follow",
 		}),
 		server.WithRegistry(r),
 		server.WithServiceAddr(addr),

@@ -13,6 +13,7 @@ import (
 type Client interface {
 	FavoriteAction(ctx context.Context, request *favorite_rpc.FavoriteActionReq, callOptions ...callopt.Option) (r *favorite_rpc.FavoriteActionResp, err error)
 	IsFavorite(ctx context.Context, request *favorite_rpc.IsFavoriteReq, callOptions ...callopt.Option) (r *favorite_rpc.IsFavoriteResp, err error)
+	FavoriteVideo(ctx context.Context, request *favorite_rpc.FavoriteVideoReq, callOptions ...callopt.Option) (r *favorite_rpc.FavoriteVideoResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -52,4 +53,9 @@ func (p *kFavoriteServiceClient) FavoriteAction(ctx context.Context, request *fa
 func (p *kFavoriteServiceClient) IsFavorite(ctx context.Context, request *favorite_rpc.IsFavoriteReq, callOptions ...callopt.Option) (r *favorite_rpc.IsFavoriteResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.IsFavorite(ctx, request)
+}
+
+func (p *kFavoriteServiceClient) FavoriteVideo(ctx context.Context, request *favorite_rpc.FavoriteVideoReq, callOptions ...callopt.Option) (r *favorite_rpc.FavoriteVideoResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.FavoriteVideo(ctx, request)
 }

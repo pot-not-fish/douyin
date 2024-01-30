@@ -27,7 +27,7 @@ func main() {
 	svr := favoriteservice.NewServer(
 		new(favorite_handler.FavoriteServiceImpl),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
-			ServiceName: "isfavorite",
+			ServiceName: "favorite",
 		}),
 		server.WithRegistry(r),
 		server.WithServiceAddr(addr),

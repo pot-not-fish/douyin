@@ -49,33 +49,25 @@ func (r *Relation) DeleteRelationCache() error {
  * @param
  * @return
  */
-func IsFollow(follower_id_list, follow_id_list []int64) ([]bool, error) {
+func IsFollow(user_id int64, follow_id int64) (bool, error) {
 	if RelationDb == nil {
-		return nil, ErrNullDB
+		return false, ErrNullDB
 	}
 
-	if len(follow_id_list) == 0 || len(follower_id_list) == 0 {
-		return nil, ErrEmptyUserID
+	if user_id <= 0 || follow_id <= 0 {
+		return false, ErrEmptyUserID
 	}
 
-	if len(follow_id_list) != len(follower_id_list) {
-		return nil, ErrInEqualList
+	if user_id == 0 || follow_id == user_id {
+		return false, nil
 	}
 
-	is_follow_list := make([]bool, 0, len(follow_id_list))
-	for k, v := range follower_id_list {
-		if v == 0 || v == follow_id_list[k] {
-			is_follow_list = append(is_follow_list, false)
-			continue
-		}
-		ok, err := dal.RedisDB.SIsMember("relation", fmt.Sprintf("%d-%d", v, follow_id_list[k])).Result()
-		if err != nil {
-			return nil, err
-		}
-		is_follow_list = append(is_follow_list, ok)
+	ok, err := dal.RedisDB.SIsMember("relation", fmt.Sprintf("%d-%d", user_id, follow_id)).Result()
+	if err != nil {
+		return false, err
 	}
 
-	return is_follow_list, nil
+	return ok, nil
 }
 
 type RelationInfo struct {
@@ -106,16 +98,11 @@ func RetrieveFollow(user_id, owner_id int64) (*RelationInfo, error) {
 	}
 
 	for _, v := range relation_list {
-		if user_id == 0 || user_id == v.FollowID {
-			relation_info_list.IsFollowList = append(relation_info_list.IsFollowList, false)
-			relation_info_list.RelationList = append(relation_info_list.RelationList, v.FollowID)
-			continue
-		}
-		ok, err := dal.RedisDB.SIsMember("relation", fmt.Sprintf("%d-%d", user_id, v.FollowID)).Result()
+		is_follow, err := IsFollow(user_id, v.FollowID)
 		if err != nil {
 			return nil, err
 		}
-		relation_info_list.IsFollowList = append(relation_info_list.IsFollowList, ok)
+		relation_info_list.IsFollowList = append(relation_info_list.IsFollowList, is_follow)
 		relation_info_list.RelationList = append(relation_info_list.RelationList, v.FollowID)
 	}
 	return &relation_info_list, nil
@@ -140,16 +127,11 @@ func RetrieveFollower(user_id, owner_id int64) (*RelationInfo, error) {
 	}
 
 	for _, v := range relation_list {
-		if user_id == 0 || user_id == v.FollowerID {
-			relation_info_list.IsFollowList = append(relation_info_list.IsFollowList, false)
-			relation_info_list.RelationList = append(relation_info_list.RelationList, v.FollowerID)
-			continue
-		}
-		ok, err := dal.RedisDB.SIsMember("relation", fmt.Sprintf("%d-%d", user_id, v.FollowerID)).Result()
+		is_follow, err := IsFollow(user_id, v.FollowerID)
 		if err != nil {
 			return nil, err
 		}
-		relation_info_list.IsFollowList = append(relation_info_list.IsFollowList, ok)
+		relation_info_list.IsFollowList = append(relation_info_list.IsFollowList, is_follow)
 		relation_info_list.RelationList = append(relation_info_list.RelationList, v.FollowerID)
 	}
 	return &relation_info_list, nil
