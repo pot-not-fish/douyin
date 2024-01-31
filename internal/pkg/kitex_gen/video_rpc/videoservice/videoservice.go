@@ -25,6 +25,8 @@ func NewServiceInfo() *kitex.ServiceInfo {
 			kitex.NewMethodInfo(videoInfoHandler, newVideoServiceVideoInfoArgs, newVideoServiceVideoInfoResult, false),
 		"VideoAction":
 			kitex.NewMethodInfo(videoActionHandler, newVideoServiceVideoActionArgs, newVideoServiceVideoActionResult, false),
+		"VideoInfoAction":
+			kitex.NewMethodInfo(videoInfoActionHandler, newVideoServiceVideoInfoActionArgs, newVideoServiceVideoInfoActionResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":	 "video_rpc",
@@ -100,6 +102,25 @@ func newVideoServiceVideoActionResult() interface{} {
 }
 
 
+func videoInfoActionHandler(ctx context.Context, handler interface{}, arg, result interface{}) error { 
+	realArg := arg.(*video_rpc.VideoServiceVideoInfoActionArgs)
+	realResult := result.(*video_rpc.VideoServiceVideoInfoActionResult)
+	success, err := handler.(video_rpc.VideoService).VideoInfoAction(ctx, realArg.Request)
+	if err != nil {
+	return err
+	}
+	realResult.Success = success
+	return nil 
+}
+func newVideoServiceVideoInfoActionArgs() interface{} {
+	return video_rpc.NewVideoServiceVideoInfoActionArgs()
+}
+
+func newVideoServiceVideoInfoActionResult() interface{} {
+	return video_rpc.NewVideoServiceVideoInfoActionResult()
+}
+
+
 type kClient struct {
 	c client.Client
 }
@@ -136,6 +157,16 @@ func (p *kClient) VideoAction(ctx context.Context , request *video_rpc.VideoActi
 	_args.Request = request
 	var _result video_rpc.VideoServiceVideoActionResult
 	if err = p.c.Call(ctx, "VideoAction", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) VideoInfoAction(ctx context.Context , request *video_rpc.VideoInfoActionReq) (r *video_rpc.VideoInfoActionResp, err error) {
+	var _args video_rpc.VideoServiceVideoInfoActionArgs
+	_args.Request = request
+	var _result video_rpc.VideoServiceVideoInfoActionResult
+	if err = p.c.Call(ctx, "VideoInfoAction", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

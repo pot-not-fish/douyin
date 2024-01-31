@@ -13,6 +13,7 @@ import (
 type Client interface {
 	UserList(ctx context.Context, request *user_rpc.UserListReq, callOptions ...callopt.Option) (r *user_rpc.UserListResp, err error)
 	UserAction(ctx context.Context, request *user_rpc.UserActionReq, callOptions ...callopt.Option) (r *user_rpc.UserActionResp, err error)
+	UserInfoAction(ctx context.Context, request *user_rpc.UserInfoActionReq, callOptions ...callopt.Option) (r *user_rpc.UserInfoActionResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -52,4 +53,9 @@ func (p *kUserServiceClient) UserList(ctx context.Context, request *user_rpc.Use
 func (p *kUserServiceClient) UserAction(ctx context.Context, request *user_rpc.UserActionReq, callOptions ...callopt.Option) (r *user_rpc.UserActionResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.UserAction(ctx, request)
+}
+
+func (p *kUserServiceClient) UserInfoAction(ctx context.Context, request *user_rpc.UserInfoActionReq, callOptions ...callopt.Option) (r *user_rpc.UserInfoActionResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.UserInfoAction(ctx, request)
 }

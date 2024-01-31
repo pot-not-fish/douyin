@@ -2,9 +2,9 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 19:40:46
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-29 17:53:28
+ * @LastEditTime: 2024-01-31 22:54:32
  * @Description:
- * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\user_dal\user_mysql.go
+ * @FilePath: \undefinedd:\vscode\goWorker\src\douyin\internal\pkg\dal\user_dal\user_mysql.go
  */
 package user_dal
 
@@ -247,37 +247,38 @@ func AESDecrypto(src string) (string, error) {
  * @param
  * @return
  */
-func (u *User) IncWorkCount() error {
+func IncWorkCount(user_id int64) error {
 	var err error
 
 	if UserDb == nil {
 		return ErrNullUserDb
 	}
 
-	if u.ID == 0 {
+	if user_id == 0 {
 		return ErrUserIdEmpty
 	}
 
-	if err = IncWorkCountCache(int64(u.ID)); err == nil {
-		go inc_work_count(u)
+	if err = IncWorkCountCache(user_id); err == nil {
+		go inc_work_count(user_id)
 		return nil
 	}
 
-	if err = inc_work_count(u); err != nil {
+	if err = inc_work_count(user_id); err != nil {
 		return err
 	}
 
 	go func() {
-		u.UpdateUserCache()
+		user := User{Model: gorm.Model{ID: uint(user_id)}}
+		user.UpdateUserCache()
 	}()
 
 	return nil
 }
 
-func inc_work_count(u *User) error {
+func inc_work_count(user_id int64) error {
 	var err error
 
-	if err = UserDb.Model(u).Where("id = ?", u.ID).Update("work_count", gorm.Expr("work_count + ?", 1)).Error; err != nil {
+	if err = UserDb.Model(&User{}).Where("id = ?", user_id).Update("work_count", gorm.Expr("work_count + ?", 1)).Error; err != nil {
 		return err
 	}
 
@@ -342,7 +343,6 @@ func inc_favorite(user_id, favorite_id int64) error {
  */
 func DecFavorite(user_id, favorite_id int64) error {
 	var err error
-
 	if UserDb == nil {
 		return ErrNullUserDb
 	}
@@ -377,6 +377,90 @@ func dec_favorite(user_id, favorite_id int64) error {
 		}
 
 		if err := tx.Model(&User{}).Where("id = ?", favorite_id).Update("total_favorited", gorm.Expr("total_favorited - ?", 1)).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func IncRelation(user_id, follow_id int64) error {
+	var err error
+	if UserDb == nil {
+		return ErrNullUserDb
+	}
+
+	if user_id <= 0 || follow_id <= 0 {
+		return ErrUserIdEmpty
+	}
+
+	if err = IncRelationCache(user_id, follow_id); err == nil {
+		go inc_relation(user_id, follow_id)
+	}
+
+	if err = inc_relation(user_id, follow_id); err != nil {
+		return err
+	}
+
+	go func() {
+		user := User{Model: gorm.Model{ID: uint(user_id)}}
+		to_user := User{Model: gorm.Model{ID: uint(follow_id)}}
+		user.UpdateUserCache()
+		to_user.UpdateUserCache()
+	}()
+
+	return nil
+}
+
+func inc_relation(user_id, follow_id int64) error {
+	return UserDb.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&User{}).Where("id = ?", user_id).Update("follow_count", gorm.Expr("follow_count + ?", 1)).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Model(&User{}).Where("id = ?", follow_id).Update("follower_count", gorm.Expr("follower_count + ?", 1)).Error; err != nil {
+			return err
+		}
+
+		return nil
+	})
+}
+
+func DecRelation(user_id, follow_id int64) error {
+	var err error
+	if UserDb == nil {
+		return ErrNullUserDb
+	}
+
+	if user_id <= 0 || follow_id <= 0 {
+		return ErrUserIdEmpty
+	}
+
+	if err = DecRelationCache(user_id, follow_id); err == nil {
+		go dec_relation(user_id, follow_id)
+	}
+
+	if err = dec_relation(user_id, follow_id); err != nil {
+		return err
+	}
+
+	go func() {
+		user := User{Model: gorm.Model{ID: uint(user_id)}}
+		to_user := User{Model: gorm.Model{ID: uint(follow_id)}}
+		user.UpdateUserCache()
+		to_user.UpdateUserCache()
+	}()
+
+	return nil
+}
+
+func dec_relation(user_id, follow_id int64) error {
+	return UserDb.Transaction(func(tx *gorm.DB) error {
+		if err := tx.Model(&User{}).Where("id = ?", user_id).Update("follow_count", gorm.Expr("follow_count - ?", 1)).Error; err != nil {
+			return err
+		}
+
+		if err := tx.Model(&User{}).Where("id = ?", follow_id).Update("follower_count", gorm.Expr("follower_count - ?", 1)).Error; err != nil {
 			return err
 		}
 

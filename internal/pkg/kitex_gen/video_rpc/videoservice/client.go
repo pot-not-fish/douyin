@@ -14,6 +14,7 @@ type Client interface {
 	VideoList(ctx context.Context, request *video_rpc.VideoListReq, callOptions ...callopt.Option) (r *video_rpc.VideoListResp, err error)
 	VideoInfo(ctx context.Context, request *video_rpc.VideoInfoReq, callOptions ...callopt.Option) (r *video_rpc.VideoListResp, err error)
 	VideoAction(ctx context.Context, request *video_rpc.VideoActionReq, callOptions ...callopt.Option) (r *video_rpc.VideoActionResp, err error)
+	VideoInfoAction(ctx context.Context, request *video_rpc.VideoInfoActionReq, callOptions ...callopt.Option) (r *video_rpc.VideoInfoActionResp, err error)
 }
 
 // NewClient creates a client for the service defined in IDL.
@@ -58,4 +59,9 @@ func (p *kVideoServiceClient) VideoInfo(ctx context.Context, request *video_rpc.
 func (p *kVideoServiceClient) VideoAction(ctx context.Context, request *video_rpc.VideoActionReq, callOptions ...callopt.Option) (r *video_rpc.VideoActionResp, err error) {
 	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
 	return p.kClient.VideoAction(ctx, request)
+}
+
+func (p *kVideoServiceClient) VideoInfoAction(ctx context.Context, request *video_rpc.VideoInfoActionReq, callOptions ...callopt.Option) (r *video_rpc.VideoInfoActionResp, err error) {
+	ctx = client.NewCtxWithCallOptions(ctx, callOptions)
+	return p.kClient.VideoInfoAction(ctx, request)
 }

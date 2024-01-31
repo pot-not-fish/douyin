@@ -39,10 +39,22 @@ struct VideoListResp {
     3: list<Video> videos; // 视频列表
 }
 
+struct VideoInfoActionReq {
+    1: i64 video_id;    // 视频id
+    2: i16 action_type; // 操作码 1-自增评论 2-自减评论 3-自增点赞量 4-自减点赞量
+}
+
+struct VideoInfoActionResp {
+    1: i16 code;   // 状态码，0-成功，其他值-失败
+    2: string msg; // 返回状态描述
+}
+
 service VideoService {
     VideoListResp VideoList(1: VideoListReq request);
 
     VideoListResp VideoInfo(1: VideoInfoReq request);
     
     VideoActionResp VideoAction(1: VideoActionReq request);
+
+    VideoInfoActionResp VideoInfoAction(1: VideoInfoActionReq request);
 }

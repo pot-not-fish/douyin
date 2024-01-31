@@ -16,7 +16,6 @@ struct User {
 // 用户信息请求
 struct UserListReq {
     1: list<i64> userinfo_id; // 需要查找的用户的id
-    2: i64 user_id;           // 用户id 0-未登录
 }
 
 struct UserListResp {
@@ -38,8 +37,21 @@ struct UserActionResp {
     3: i64 id;     // 用户id
 }
 
+struct UserInfoActionReq {
+    1: i64 user_id;             // 用户id
+    2: i16 action_type;         // 操作码 1-点赞数自增 2-点赞数自减 3-作品数自增 4-关注自增 5-关注自减
+    3: optional i64 to_user_id; // 需要关注、取消关注的用户
+}
+
+struct UserInfoActionResp {
+    1: i16 code;   // 状态码，0-成功，其他值-失败
+    2: string msg; // 返回状态描述
+}
+
 service UserService {
     UserListResp UserList(1: UserListReq request);
 
     UserActionResp UserAction(1: UserActionReq request);
+
+    UserInfoActionResp UserInfoAction(1: UserInfoActionReq request);
 }

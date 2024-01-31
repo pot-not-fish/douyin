@@ -23,6 +23,8 @@ func NewServiceInfo() *kitex.ServiceInfo {
 			kitex.NewMethodInfo(userListHandler, newUserServiceUserListArgs, newUserServiceUserListResult, false),
 		"UserAction":
 			kitex.NewMethodInfo(userActionHandler, newUserServiceUserActionArgs, newUserServiceUserActionResult, false),
+		"UserInfoAction":
+			kitex.NewMethodInfo(userInfoActionHandler, newUserServiceUserInfoActionArgs, newUserServiceUserInfoActionResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":	 "user_rpc",
@@ -79,6 +81,25 @@ func newUserServiceUserActionResult() interface{} {
 }
 
 
+func userInfoActionHandler(ctx context.Context, handler interface{}, arg, result interface{}) error { 
+	realArg := arg.(*user_rpc.UserServiceUserInfoActionArgs)
+	realResult := result.(*user_rpc.UserServiceUserInfoActionResult)
+	success, err := handler.(user_rpc.UserService).UserInfoAction(ctx, realArg.Request)
+	if err != nil {
+	return err
+	}
+	realResult.Success = success
+	return nil 
+}
+func newUserServiceUserInfoActionArgs() interface{} {
+	return user_rpc.NewUserServiceUserInfoActionArgs()
+}
+
+func newUserServiceUserInfoActionResult() interface{} {
+	return user_rpc.NewUserServiceUserInfoActionResult()
+}
+
+
 type kClient struct {
 	c client.Client
 }
@@ -105,6 +126,16 @@ func (p *kClient) UserAction(ctx context.Context , request *user_rpc.UserActionR
 	_args.Request = request
 	var _result user_rpc.UserServiceUserActionResult
 	if err = p.c.Call(ctx, "UserAction", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
+
+func (p *kClient) UserInfoAction(ctx context.Context , request *user_rpc.UserInfoActionReq) (r *user_rpc.UserInfoActionResp, err error) {
+	var _args user_rpc.UserServiceUserInfoActionArgs
+	_args.Request = request
+	var _result user_rpc.UserServiceUserInfoActionResult
+	if err = p.c.Call(ctx, "UserInfoAction", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil
