@@ -23,10 +23,8 @@ func NewServiceInfo() *kitex.ServiceInfo {
 			kitex.NewMethodInfo(relationActionHandler, newFollowServiceRelationActionArgs, newFollowServiceRelationActionResult, false),
 		"IsFollow":
 			kitex.NewMethodInfo(isFollowHandler, newFollowServiceIsFollowArgs, newFollowServiceIsFollowResult, false),
-		"FollowList":
-			kitex.NewMethodInfo(followListHandler, newFollowServiceFollowListArgs, newFollowServiceFollowListResult, false),
-		"FollowerList":
-			kitex.NewMethodInfo(followerListHandler, newFollowServiceFollowerListArgs, newFollowServiceFollowerListResult, false),
+		"RelationList":
+			kitex.NewMethodInfo(relationListHandler, newFollowServiceRelationListArgs, newFollowServiceRelationListResult, false),
 	}
 	extra := map[string]interface{}{
 		"PackageName":	 "follow_rpc",
@@ -83,41 +81,22 @@ func newFollowServiceIsFollowResult() interface{} {
 }
 
 
-func followListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error { 
-	realArg := arg.(*follow_rpc.FollowServiceFollowListArgs)
-	realResult := result.(*follow_rpc.FollowServiceFollowListResult)
-	success, err := handler.(follow_rpc.FollowService).FollowList(ctx, realArg.Request)
+func relationListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error { 
+	realArg := arg.(*follow_rpc.FollowServiceRelationListArgs)
+	realResult := result.(*follow_rpc.FollowServiceRelationListResult)
+	success, err := handler.(follow_rpc.FollowService).RelationList(ctx, realArg.Request)
 	if err != nil {
 	return err
 	}
 	realResult.Success = success
 	return nil 
 }
-func newFollowServiceFollowListArgs() interface{} {
-	return follow_rpc.NewFollowServiceFollowListArgs()
+func newFollowServiceRelationListArgs() interface{} {
+	return follow_rpc.NewFollowServiceRelationListArgs()
 }
 
-func newFollowServiceFollowListResult() interface{} {
-	return follow_rpc.NewFollowServiceFollowListResult()
-}
-
-
-func followerListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error { 
-	realArg := arg.(*follow_rpc.FollowServiceFollowerListArgs)
-	realResult := result.(*follow_rpc.FollowServiceFollowerListResult)
-	success, err := handler.(follow_rpc.FollowService).FollowerList(ctx, realArg.Request)
-	if err != nil {
-	return err
-	}
-	realResult.Success = success
-	return nil 
-}
-func newFollowServiceFollowerListArgs() interface{} {
-	return follow_rpc.NewFollowServiceFollowerListArgs()
-}
-
-func newFollowServiceFollowerListResult() interface{} {
-	return follow_rpc.NewFollowServiceFollowerListResult()
+func newFollowServiceRelationListResult() interface{} {
+	return follow_rpc.NewFollowServiceRelationListResult()
 }
 
 
@@ -152,21 +131,11 @@ func (p *kClient) IsFollow(ctx context.Context , request *follow_rpc.IsFollowReq
 	return _result.GetSuccess(), nil
 }
 
-func (p *kClient) FollowList(ctx context.Context , request *follow_rpc.FollowListReq) (r *follow_rpc.FollowListResp, err error) {
-	var _args follow_rpc.FollowServiceFollowListArgs
+func (p *kClient) RelationList(ctx context.Context , request *follow_rpc.RelationListReq) (r *follow_rpc.RelationListResp, err error) {
+	var _args follow_rpc.FollowServiceRelationListArgs
 	_args.Request = request
-	var _result follow_rpc.FollowServiceFollowListResult
-	if err = p.c.Call(ctx, "FollowList", &_args, &_result); err != nil {
-		return
-	}
-	return _result.GetSuccess(), nil
-}
-
-func (p *kClient) FollowerList(ctx context.Context , request *follow_rpc.FollowerListReq) (r *follow_rpc.FollowerListResp, err error) {
-	var _args follow_rpc.FollowServiceFollowerListArgs
-	_args.Request = request
-	var _result follow_rpc.FollowServiceFollowerListResult
-	if err = p.c.Call(ctx, "FollowerList", &_args, &_result); err != nil {
+	var _result follow_rpc.FollowServiceRelationListResult
+	if err = p.c.Call(ctx, "RelationList", &_args, &_result); err != nil {
 		return
 	}
 	return _result.GetSuccess(), nil

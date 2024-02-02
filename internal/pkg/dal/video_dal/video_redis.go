@@ -2,9 +2,9 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-12 16:30:21
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-30 23:58:19
+ * @LastEditTime: 2024-02-01 23:01:00
  * @Description:
- * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\video_dal\video_redis.go
+ * @FilePath: \undefinedd:\vscode\goWorker\src\douyin\internal\pkg\dal\video_dal\video_redis.go
  */
 package video_dal
 
@@ -51,7 +51,7 @@ func (video *Video) Publish() error {
  * @param (num int64) 获取的长度多少
  * @return ([]Video, int64, error) 返回视频列表，下一次从哪一段开始
  */
-func VideoSubscribe(offset int64, limit int64) ([]Video, int64, error) {
+func VideoFeed(offset int64, limit int64) ([]Video, int64, error) {
 
 	// 保证每次拿到的偏移量都能够整除
 	if offset%limit != 0 {

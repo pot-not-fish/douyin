@@ -19,6 +19,8 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	serviceName := "VideoService"
 	handlerType := (*video_rpc.VideoService)(nil)
 	methods := map[string]kitex.MethodInfo{
+		"VideoFeed":
+			kitex.NewMethodInfo(videoFeedHandler, newVideoServiceVideoFeedArgs, newVideoServiceVideoFeedResult, false),
 		"VideoList":
 			kitex.NewMethodInfo(videoListHandler, newVideoServiceVideoListArgs, newVideoServiceVideoListResult, false),
 		"VideoInfo":
@@ -43,6 +45,25 @@ func NewServiceInfo() *kitex.ServiceInfo {
 	return svcInfo
 }
 
+
+
+func videoFeedHandler(ctx context.Context, handler interface{}, arg, result interface{}) error { 
+	realArg := arg.(*video_rpc.VideoServiceVideoFeedArgs)
+	realResult := result.(*video_rpc.VideoServiceVideoFeedResult)
+	success, err := handler.(video_rpc.VideoService).VideoFeed(ctx, realArg.Request)
+	if err != nil {
+	return err
+	}
+	realResult.Success = success
+	return nil 
+}
+func newVideoServiceVideoFeedArgs() interface{} {
+	return video_rpc.NewVideoServiceVideoFeedArgs()
+}
+
+func newVideoServiceVideoFeedResult() interface{} {
+	return video_rpc.NewVideoServiceVideoFeedResult()
+}
 
 
 func videoListHandler(ctx context.Context, handler interface{}, arg, result interface{}) error { 
@@ -131,6 +152,16 @@ func newServiceClient(c client.Client) *kClient {
 	}
 }
 
+
+func (p *kClient) VideoFeed(ctx context.Context , request *video_rpc.VideoFeedReq) (r *video_rpc.VideoFeedResp, err error) {
+	var _args video_rpc.VideoServiceVideoFeedArgs
+	_args.Request = request
+	var _result video_rpc.VideoServiceVideoFeedResult
+	if err = p.c.Call(ctx, "VideoFeed", &_args, &_result); err != nil {
+		return
+	}
+	return _result.GetSuccess(), nil
+}
 
 func (p *kClient) VideoList(ctx context.Context , request *video_rpc.VideoListReq) (r *video_rpc.VideoListResp, err error) {
 	var _args video_rpc.VideoServiceVideoListArgs

@@ -2,7 +2,7 @@ package mw
 
 import (
 	"context"
-	"douyin/internal/pkg/dal/user_dal"
+	"douyin/internal/pkg/kitex_client"
 	"fmt"
 	"net/http"
 	"time"
@@ -40,21 +40,17 @@ func InitJwt() {
 				return "", jwt.ErrMissingLoginValues
 			}
 
-			// 数据库创建用户
-			var user = user_dal.User{
-				Name:     loginReq.Username,
-				Password: loginReq.Password,
-			}
-			if err = user.RetrieveAccount(); err != nil {
+			userActionResp, err := kitex_client.UserActionRpc(ctx, 2, loginReq.Username, loginReq.Password)
+			if err != nil {
 				return "", err
 			}
 
 			// 后续相应会用到user_id，所以要存入上下文
-			c.Set("user_id", user.ID)
+			c.Set("user_id", userActionResp.User.Id)
 
 			return &Payload{
-				Name:    user.Name,
-				User_id: int64(user.ID),
+				Name:    loginReq.Username,
+				User_id: userActionResp.User.Id,
 			}, nil
 		},
 		PayloadFunc: func(data interface{}) jwt.MapClaims {

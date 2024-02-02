@@ -1267,7 +1267,7 @@ func (p *UserActionResp) FastRead(buf []byte) (int, error) {
 				}
 			}
 		case 3:
-			if fieldTypeId == thrift.I64 {
+			if fieldTypeId == thrift.STRUCT {
 				l, err = p.FastReadField3(buf[offset:])
 				offset += l
 				if err != nil {
@@ -1346,14 +1346,13 @@ func (p *UserActionResp) FastReadField2(buf []byte) (int, error) {
 func (p *UserActionResp) FastReadField3(buf []byte) (int, error) {
 	offset := 0
 
-	if v, l, err := bthrift.Binary.ReadI64(buf[offset:]); err != nil {
+	tmp := NewUser()
+	if l, err := tmp.FastRead(buf[offset:]); err != nil {
 		return offset, err
 	} else {
 		offset += l
-
-		p.Id = v
-
 	}
+	p.User = tmp
 	return offset, nil
 }
 
@@ -1367,8 +1366,8 @@ func (p *UserActionResp) FastWriteNocopy(buf []byte, binaryWriter bthrift.Binary
 	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "UserActionResp")
 	if p != nil {
 		offset += p.fastWriteField1(buf[offset:], binaryWriter)
-		offset += p.fastWriteField3(buf[offset:], binaryWriter)
 		offset += p.fastWriteField2(buf[offset:], binaryWriter)
+		offset += p.fastWriteField3(buf[offset:], binaryWriter)
 	}
 	offset += bthrift.Binary.WriteFieldStop(buf[offset:])
 	offset += bthrift.Binary.WriteStructEnd(buf[offset:])
@@ -1408,9 +1407,8 @@ func (p *UserActionResp) fastWriteField2(buf []byte, binaryWriter bthrift.Binary
 
 func (p *UserActionResp) fastWriteField3(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "id", thrift.I64, 3)
-	offset += bthrift.Binary.WriteI64(buf[offset:], p.Id)
-
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "user", thrift.STRUCT, 3)
+	offset += p.User.FastWriteNocopy(buf[offset:], binaryWriter)
 	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
 	return offset
 }
@@ -1435,9 +1433,8 @@ func (p *UserActionResp) field2Length() int {
 
 func (p *UserActionResp) field3Length() int {
 	l := 0
-	l += bthrift.Binary.FieldBeginLength("id", thrift.I64, 3)
-	l += bthrift.Binary.I64Length(p.Id)
-
+	l += bthrift.Binary.FieldBeginLength("user", thrift.STRUCT, 3)
+	l += p.User.BLength()
 	l += bthrift.Binary.FieldEndLength()
 	return l
 }

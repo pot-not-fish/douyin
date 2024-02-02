@@ -8,7 +8,7 @@ import (
 
 type FollowServiceImpl struct{}
 
-func (r *FollowServiceImpl) RelationAction(ctx context.Context, request *follow_rpc.RelationActionReq) (*follow_rpc.RelationActionResp, error) {
+func (f *FollowServiceImpl) RelationAction(ctx context.Context, request *follow_rpc.RelationActionReq) (*follow_rpc.RelationActionResp, error) {
 	var err error
 	resp := new(follow_rpc.RelationActionResp)
 
@@ -41,7 +41,7 @@ func (r *FollowServiceImpl) RelationAction(ctx context.Context, request *follow_
 	return resp, nil
 }
 
-func (r *FollowServiceImpl) IsFollow(ctx context.Context, request *follow_rpc.IsFollowReq) (*follow_rpc.IsFollowResp, error) {
+func (f *FollowServiceImpl) IsFollow(ctx context.Context, request *follow_rpc.IsFollowReq) (*follow_rpc.IsFollowResp, error) {
 	resp := new(follow_rpc.IsFollowResp)
 
 	for _, v := range request.FollowId {
@@ -59,40 +59,35 @@ func (r *FollowServiceImpl) IsFollow(ctx context.Context, request *follow_rpc.Is
 	return resp, nil
 }
 
-func (r *FollowServiceImpl) FollowList(ctx context.Context, request *follow_rpc.FollowListReq) (*follow_rpc.FollowListResp, error) {
-	resp := new(follow_rpc.FollowListResp)
+func (f *FollowServiceImpl) RelationList(ctx context.Context, request *follow_rpc.RelationListReq) (*follow_rpc.RelationListResp, error) {
+	var err error
+	resp := new(follow_rpc.RelationListResp)
 
-	relation_info, err := relation_dal.RetrieveFollow(request.UserId, request.OwnerId)
-	if err != nil {
+	relation_info := new(relation_dal.RelationInfo)
+	switch request.ActionType {
+	case 1:
+		relation_info, err = relation_dal.RetrieveFollow(request.UserId, request.OwnerId)
+		if err != nil {
+			resp.Code = 1
+			resp.Msg = err.Error()
+			return resp, nil
+		}
+	case 2:
+		relation_info, err = relation_dal.RetrieveFollower(request.UserId, request.OwnerId)
+		if err != nil {
+			resp.Code = 1
+			resp.Msg = err.Error()
+			return resp, nil
+		}
+	default:
 		resp.Code = 1
-		resp.Msg = err.Error()
+		resp.Msg = "invalid action type"
 		return resp, nil
 	}
 
-	resp = &follow_rpc.FollowListResp{
-		Code:     0,
-		Msg:      "ok",
-		IsFollow: relation_info.IsFollowList,
-		UserId:   relation_info.RelationList,
-	}
-	return resp, nil
-}
-
-func (r *FollowServiceImpl) FollowerList(ctx context.Context, request *follow_rpc.FollowerListReq) (*follow_rpc.FollowerListResp, error) {
-	resp := new(follow_rpc.FollowerListResp)
-
-	relation_info, err := relation_dal.RetrieveFollower(request.UserId, request.OwnerId)
-	if err != nil {
-		resp.Code = 1
-		resp.Msg = err.Error()
-		return resp, nil
-	}
-
-	resp = &follow_rpc.FollowerListResp{
-		Code:     0,
-		Msg:      "ok",
-		IsFollow: relation_info.IsFollowList,
-		UserId:   relation_info.RelationList,
-	}
+	resp.IsFollow = relation_info.IsFollowList
+	resp.UserId = relation_info.RelationList
+	resp.Code = 0
+	resp.Msg = "ok"
 	return resp, nil
 }

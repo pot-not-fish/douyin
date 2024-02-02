@@ -2,9 +2,9 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-13 10:37:00
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-31 22:57:22
+ * @LastEditTime: 2024-02-02 17:53:25
  * @Description:
- * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\user_handler\handler.go
+ * @FilePath: \douyin\internal\kitex-server\user_handler\handler.go
  */
 package user_handler
 
@@ -75,7 +75,18 @@ func (u *UserServiceImpl) UserAction(ctx context.Context, request *user_rpc.User
 		return resp, nil
 	}
 
-	resp.Id = int64(user.ID)
+	resp.User = &user_rpc.User{
+		Id:             int64(user.ID),
+		Name:           user.Name,
+		FollowCount:    user.FollowCount,
+		FollowerCount:  user.FollowerCount,
+		Avatar:         user.Avatar,
+		Background:     user.Background,
+		Signature:      user.Signature,
+		TotalFavorited: user.TotalFavorited,
+		WorkCount:      user.WorkCount,
+		FavoriteCount:  user.FavoriteCount,
+	}
 	resp.Code = 0
 	resp.Msg = "ok"
 	return resp, nil

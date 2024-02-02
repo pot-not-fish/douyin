@@ -34,7 +34,7 @@ struct UserActionReq {
 struct UserActionResp {
     1: i16 code;   // 状态码，0-成功，其他值-失败
     2: string msg; // 返回状态描述
-    3: i64 id;     // 用户id
+    3: User user;  // 用户信息
 }
 
 struct UserInfoActionReq {

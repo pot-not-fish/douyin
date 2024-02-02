@@ -24,29 +24,16 @@ struct IsFollowResp {
     3: list<bool> is_follow; // 是否关注
 }
 
-// 关注列表
-struct FollowListReq {
-    1: i64 user_id;  // 用户id
-    2: i64 owner_id; // 所访问的用户id
+struct RelationListReq {
+    1: i64 user_id;     // 用户id
+    2: i64 owner_id;    // 所访问的用户id
+    3: i16 action_type; // 操作码 1-关注列表 2-粉丝列表
 }
 
-struct FollowListResp {
+struct RelationListResp {
     1: i16 code;             // 状态码，0-成功，其他值-失败
     2: string msg;           // 返回状态描述
     3: list<i64> user_id;    // 访问的用户所关注的用户的id
-    4: list<bool> is_follow; // 是否关注
-}
-
-// 粉丝列表
-struct FollowerListReq {
-    1: i64 user_id;  // 用户id
-    2: i64 owner_id; // 所访问的用户id
-}
-
-struct FollowerListResp {
-    1: i16 code;             // 状态码，0-成功，其他值-失败
-    2: string msg;           // 返回状态描述
-    3: list<i64> user_id;    // 访问的用户的粉丝的id
     4: list<bool> is_follow; // 是否关注
 }
 
@@ -55,7 +42,5 @@ service FollowService {
 
     IsFollowResp IsFollow(1: IsFollowReq request);
 
-    FollowListResp FollowList(1: FollowListReq request);
-
-    FollowerListResp FollowerList(1: FollowerListReq request);
+    RelationListResp RelationList(1: RelationListReq request);
 }

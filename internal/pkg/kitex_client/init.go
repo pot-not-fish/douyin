@@ -2,16 +2,18 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-13 19:38:25
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-14 20:56:46
+ * @LastEditTime: 2024-02-02 21:50:34
  * @Description:
- * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\kitex_client\init.go
+ * @FilePath: \douyin\internal\pkg\kitex_client\init.go
  */
 package kitex_client
 
 import (
+	"douyin/internal/pkg/kitex_gen/comment_rpc/commentservice"
 	"douyin/internal/pkg/kitex_gen/favorite_rpc/favoriteservice"
 	"douyin/internal/pkg/kitex_gen/follow_rpc/followservice"
 	"douyin/internal/pkg/kitex_gen/user_rpc/userservice"
+	"douyin/internal/pkg/kitex_gen/video_rpc/videoservice"
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/discovery"
@@ -21,11 +23,15 @@ import (
 var (
 	etcdClient discovery.Resolver
 
-	userinfoClient userservice.Client
+	UserinfoClient userservice.Client
 
-	favoriteClient favoriteservice.Client
+	FavoriteClient favoriteservice.Client
 
-	followClient followservice.Client
+	FollowClient followservice.Client
+
+	VideoClient videoservice.Client
+
+	CommentClient commentservice.Client
 )
 
 func Init() {
@@ -35,17 +41,27 @@ func Init() {
 		panic(err)
 	}
 
-	userinfoClient, err = userservice.NewClient("userinfo", client.WithResolver(etcdClient))
+	UserinfoClient, err = userservice.NewClient("user", client.WithResolver(etcdClient))
 	if err != nil {
 		panic(err)
 	}
 
-	favoriteClient, err = favoriteservice.NewClient("isfavorite", client.WithResolver(etcdClient))
+	FavoriteClient, err = favoriteservice.NewClient("favorite", client.WithResolver(etcdClient))
 	if err != nil {
 		panic(err)
 	}
 
-	followClient, err = followservice.NewClient("isfollow", client.WithResolver(etcdClient))
+	FollowClient, err = followservice.NewClient("follow", client.WithResolver(etcdClient))
+	if err != nil {
+		panic(err)
+	}
+
+	VideoClient, err = videoservice.NewClient("video", client.WithResolver(etcdClient))
+	if err != nil {
+		panic(err)
+	}
+
+	CommentClient, err = commentservice.NewClient("comment", client.WithResolver(etcdClient))
 	if err != nil {
 		panic(err)
 	}

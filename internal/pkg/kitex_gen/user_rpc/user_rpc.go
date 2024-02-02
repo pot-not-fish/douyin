@@ -1487,7 +1487,7 @@ func (p *UserActionReq) Field3DeepEqual(src string) bool {
 type UserActionResp struct {
 	Code int16  `thrift:"code,1" frugal:"1,default,i16" json:"code"`
 	Msg  string `thrift:"msg,2" frugal:"2,default,string" json:"msg"`
-	Id   int64  `thrift:"id,3" frugal:"3,default,i64" json:"id"`
+	User *User  `thrift:"user,3" frugal:"3,default,User" json:"user"`
 }
 
 func NewUserActionResp() *UserActionResp {
@@ -1506,8 +1506,13 @@ func (p *UserActionResp) GetMsg() (v string) {
 	return p.Msg
 }
 
-func (p *UserActionResp) GetId() (v int64) {
-	return p.Id
+var UserActionResp_User_DEFAULT *User
+
+func (p *UserActionResp) GetUser() (v *User) {
+	if !p.IsSetUser() {
+		return UserActionResp_User_DEFAULT
+	}
+	return p.User
 }
 func (p *UserActionResp) SetCode(val int16) {
 	p.Code = val
@@ -1515,14 +1520,18 @@ func (p *UserActionResp) SetCode(val int16) {
 func (p *UserActionResp) SetMsg(val string) {
 	p.Msg = val
 }
-func (p *UserActionResp) SetId(val int64) {
-	p.Id = val
+func (p *UserActionResp) SetUser(val *User) {
+	p.User = val
 }
 
 var fieldIDToName_UserActionResp = map[int16]string{
 	1: "code",
 	2: "msg",
-	3: "id",
+	3: "user",
+}
+
+func (p *UserActionResp) IsSetUser() bool {
+	return p.User != nil
 }
 
 func (p *UserActionResp) Read(iprot thrift.TProtocol) (err error) {
@@ -1565,7 +1574,7 @@ func (p *UserActionResp) Read(iprot thrift.TProtocol) (err error) {
 				}
 			}
 		case 3:
-			if fieldTypeId == thrift.I64 {
+			if fieldTypeId == thrift.STRUCT {
 				if err = p.ReadField3(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -1623,10 +1632,9 @@ func (p *UserActionResp) ReadField2(iprot thrift.TProtocol) error {
 }
 
 func (p *UserActionResp) ReadField3(iprot thrift.TProtocol) error {
-	if v, err := iprot.ReadI64(); err != nil {
+	p.User = NewUser()
+	if err := p.User.Read(iprot); err != nil {
 		return err
-	} else {
-		p.Id = v
 	}
 	return nil
 }
@@ -1703,10 +1711,10 @@ WriteFieldEndError:
 }
 
 func (p *UserActionResp) writeField3(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("id", thrift.I64, 3); err != nil {
+	if err = oprot.WriteFieldBegin("user", thrift.STRUCT, 3); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteI64(p.Id); err != nil {
+	if err := p.User.Write(oprot); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -1738,7 +1746,7 @@ func (p *UserActionResp) DeepEqual(ano *UserActionResp) bool {
 	if !p.Field2DeepEqual(ano.Msg) {
 		return false
 	}
-	if !p.Field3DeepEqual(ano.Id) {
+	if !p.Field3DeepEqual(ano.User) {
 		return false
 	}
 	return true
@@ -1758,9 +1766,9 @@ func (p *UserActionResp) Field2DeepEqual(src string) bool {
 	}
 	return true
 }
-func (p *UserActionResp) Field3DeepEqual(src int64) bool {
+func (p *UserActionResp) Field3DeepEqual(src *User) bool {
 
-	if p.Id != src {
+	if !p.User.DeepEqual(src) {
 		return false
 	}
 	return true
