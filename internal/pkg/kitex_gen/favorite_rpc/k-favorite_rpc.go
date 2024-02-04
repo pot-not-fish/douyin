@@ -450,7 +450,7 @@ func (p *IsFavoriteReq) FastRead(buf []byte) (int, error) {
 		}
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.LIST {
+			if fieldTypeId == thrift.I64 {
 				l, err = p.FastReadField1(buf[offset:])
 				offset += l
 				if err != nil {
@@ -515,29 +515,13 @@ ReadStructEndError:
 func (p *IsFavoriteReq) FastReadField1(buf []byte) (int, error) {
 	offset := 0
 
-	_, size, l, err := bthrift.Binary.ReadListBegin(buf[offset:])
-	offset += l
-	if err != nil {
-		return offset, err
-	}
-	p.UserId = make([]int64, 0, size)
-	for i := 0; i < size; i++ {
-		var _elem int64
-		if v, l, err := bthrift.Binary.ReadI64(buf[offset:]); err != nil {
-			return offset, err
-		} else {
-			offset += l
-
-			_elem = v
-
-		}
-
-		p.UserId = append(p.UserId, _elem)
-	}
-	if l, err := bthrift.Binary.ReadListEnd(buf[offset:]); err != nil {
+	if v, l, err := bthrift.Binary.ReadI64(buf[offset:]); err != nil {
 		return offset, err
 	} else {
 		offset += l
+
+		p.UserId = v
+
 	}
 	return offset, nil
 }
@@ -603,17 +587,9 @@ func (p *IsFavoriteReq) BLength() int {
 
 func (p *IsFavoriteReq) fastWriteField1(buf []byte, binaryWriter bthrift.BinaryWriter) int {
 	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "user_id", thrift.LIST, 1)
-	listBeginOffset := offset
-	offset += bthrift.Binary.ListBeginLength(thrift.I64, 0)
-	var length int
-	for _, v := range p.UserId {
-		length++
-		offset += bthrift.Binary.WriteI64(buf[offset:], v)
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "user_id", thrift.I64, 1)
+	offset += bthrift.Binary.WriteI64(buf[offset:], p.UserId)
 
-	}
-	bthrift.Binary.WriteListBegin(buf[listBeginOffset:], thrift.I64, length)
-	offset += bthrift.Binary.WriteListEnd(buf[offset:])
 	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
 	return offset
 }
@@ -637,11 +613,9 @@ func (p *IsFavoriteReq) fastWriteField2(buf []byte, binaryWriter bthrift.BinaryW
 
 func (p *IsFavoriteReq) field1Length() int {
 	l := 0
-	l += bthrift.Binary.FieldBeginLength("user_id", thrift.LIST, 1)
-	l += bthrift.Binary.ListBeginLength(thrift.I64, len(p.UserId))
-	var tmpV int64
-	l += bthrift.Binary.I64Length(int64(tmpV)) * len(p.UserId)
-	l += bthrift.Binary.ListEndLength()
+	l += bthrift.Binary.FieldBeginLength("user_id", thrift.I64, 1)
+	l += bthrift.Binary.I64Length(p.UserId)
+
 	l += bthrift.Binary.FieldEndLength()
 	return l
 }

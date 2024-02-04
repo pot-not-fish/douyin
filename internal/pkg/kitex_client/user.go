@@ -2,9 +2,9 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-13 19:45:41
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-02 23:37:26
+ * @LastEditTime: 2024-02-04 14:07:03
  * @Description:
- * @FilePath: \douyin\internal\pkg\kitex_client\user.go
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\kitex_client\user.go
  */
 package kitex_client
 
@@ -64,19 +64,19 @@ func UserActionRpc(ctx context.Context, action_type int16, username, password st
  * @param action_type 操作码 1-点赞数自增 2-点赞数自减 3-作品数自增 4-关注自增 5-关注自减
  * @return
  */
-func UserInfoActionRpc(ctx context.Context, action_type int16, user_id int64, to_user_id *int64) (*user_rpc.UserInfoActionResp, error) {
+func UserInfoActionRpc(ctx context.Context, action_type int16, user_id int64, to_user_id *int64) error {
 	respRpc, err := UserinfoClient.UserInfoAction(ctx, &user_rpc.UserInfoActionReq{
 		ActionType: action_type,
 		UserId:     user_id,
 		ToUserId:   to_user_id,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if respRpc.Code != 0 {
-		return nil, fmt.Errorf(respRpc.Msg)
+		return fmt.Errorf(respRpc.Msg)
 	}
 
-	return respRpc, nil
+	return nil
 }

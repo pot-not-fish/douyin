@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 17:28:27
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-21 21:20:33
+ * @LastEditTime: 2024-02-03 11:11:47
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\hertz-server\handler\user_api\user_service.go
  */
@@ -14,7 +14,6 @@ import (
 	"context"
 
 	user_api "douyin/internal/hertz-server/model/user_api"
-	"douyin/internal/pkg/dal/user_dal"
 	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/mw"
 
@@ -33,27 +32,24 @@ func Register(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	// 创建用户数据库信息
-	var user = user_dal.User{
-		Name:     req.Username,
-		Password: req.Password,
-	}
-	if err = user.CreateUser(); err != nil {
-		resp := new(user_api.RegisterResp)
-		resp.StatusMsg = err.Error()
+	resp := new(user_api.RegisterResp)
+
+	user, err := kitex_client.UserActionRpc(ctx, 1, req.Username, req.Password)
+	if err != nil {
 		resp.StatusCode = 1
+		resp.StatusMsg = err.Error()
 		c.JSON(consts.StatusOK, resp)
+		return
 	}
 
 	// 生成token
 	token, _, err := mw.JwtMiddleware.TokenGenerator(&mw.Payload{ // 这里一定要取地址，因为断言是取payload地址比较的
-		Name:    user.Name,
-		User_id: int64(user.ID),
+		Name:    user.User.Name,
+		User_id: int64(user.User.Id),
 	})
 	if err != nil {
-		resp := new(user_api.RegisterResp)
-		resp.StatusMsg = err.Error()
 		resp.StatusCode = 1
+		resp.StatusMsg = err.Error()
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
@@ -62,7 +58,7 @@ func Register(ctx context.Context, c *app.RequestContext) {
 		StatusCode: 0,
 		StatusMsg:  "OK",
 		Token:      token,
-		UserID:     int64(user.ID),
+		UserID:     int64(user.User.Id),
 	})
 }
 
@@ -80,7 +76,7 @@ func Userinfo(ctx context.Context, c *app.RequestContext) {
 	resp := new(user_api.UserinfoResp)
 
 	// 将id发送给kitex userinfo的rpc服务，获取用户信息
-	userinfo, err := kitex_client.UserinfoRpc(ctx, []int64{req.UserID})
+	userInfo, err := kitex_client.UserListRpc(ctx, []int64{req.UserID})
 	if err != nil {
 		resp.StatusMsg = err.Error()
 		resp.StatusCode = 1
@@ -88,10 +84,8 @@ func Userinfo(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	var isfollow bool
-	if req.Token == nil || *req.Token == "" { // nil对应不存在token字段，""对应token值为空
-		isfollow = false
-	} else {
+	isFollow := false
+	if req.Token != nil && *req.Token != "" { // 用户登录的情况要判断其是否关注
 		user_id, err := mw.TokenGetUserId(req.Token)
 		if err != nil {
 			resp.StatusCode = 1
@@ -100,32 +94,30 @@ func Userinfo(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
-		var isfollow_list = make([]bool, 0, 1)
-		isfollow_list, err = kitex_client.IsFollowRpc(ctx, []int64{user_id}, []int64{req.UserID})
+		isFollowList, err := kitex_client.IsFollowRpc(ctx, user_id, []int64{req.UserID})
 		if err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
-
-		isfollow = isfollow_list[0]
+		isFollow = isFollowList.IsFollow[0]
 	}
 
 	resp.StatusCode = 0
 	resp.StatusMsg = "Welcome"
 	resp.User = &user_api.User{
-		ID:              userinfo.User[0].UserId,
-		Name:            userinfo.User[0].Name,
-		FollowCount:     userinfo.User[0].FollowCount,
-		FollowerCount:   userinfo.User[0].FollowerCount,
-		IsFollow:        isfollow,
-		Avatar:          userinfo.User[0].Avatar,
-		BackgroundImage: userinfo.User[0].Background,
-		Signature:       userinfo.User[0].Signature,
-		TotalFavorited:  userinfo.User[0].TotalFavorited,
-		WorkCount:       userinfo.User[0].WorkCount,
-		FavoriteCount:   userinfo.User[0].FavoriteCount,
+		ID:              userInfo.Users[0].Id,
+		Name:            userInfo.Users[0].Name,
+		FollowCount:     userInfo.Users[0].FollowCount,
+		FollowerCount:   userInfo.Users[0].FollowerCount,
+		IsFollow:        isFollow,
+		Avatar:          userInfo.Users[0].Avatar,
+		BackgroundImage: userInfo.Users[0].Background,
+		Signature:       userInfo.Users[0].Signature,
+		TotalFavorited:  userInfo.Users[0].TotalFavorited,
+		WorkCount:       userInfo.Users[0].WorkCount,
+		FavoriteCount:   userInfo.Users[0].FavoriteCount,
 	}
 
 	c.JSON(consts.StatusOK, resp)

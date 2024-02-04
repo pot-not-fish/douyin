@@ -4,17 +4,14 @@ package comment_api
 
 import (
 	"context"
-	"fmt"
 
 	comment_api "douyin/internal/hertz-server/model/comment_api"
 	"douyin/internal/hertz-server/model/user_api"
-	"douyin/internal/pkg/dal/video_dal"
 	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/mw"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
-	"gorm.io/gorm"
 )
 
 // CommentAction .
@@ -30,14 +27,14 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(comment_api.CommentActionResp)
 
-	row_user_id, ok := c.Get("user_id")
+	rowUserID, ok := c.Get("user_id")
 	if !ok {
 		resp.StatusCode = 1
 		resp.StatusMsg = "could not find user_id"
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
-	user_id := row_user_id.(int64)
+	userID := rowUserID.(int64)
 
 	switch req.ActionType {
 	case 1:
@@ -48,20 +45,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
-		var comment = &video_dal.Comment{
-			Content:    *req.CommentText,
-			UserId:     user_id,
-			VideoRefer: uint(req.VideoID),
-		}
-
-		if err := comment.CreateComment(); err != nil {
-			resp.StatusCode = 1
-			resp.StatusMsg = err.Error()
-			c.JSON(consts.StatusOK, resp)
-			return
-		}
-
-		userinfo, err := kitex_client.UserinfoRpc(ctx, []int64{user_id})
+		commentActionRpc, err := kitex_client.CommentActionRpc(ctx, 1, userID, req.VideoID, req.CommentText)
 		if err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
@@ -69,24 +53,31 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
-		create_date := fmt.Sprintf("%d-%d-%d %d:%d", comment.CreatedAt.Year(), comment.CreatedAt.Month(), comment.CreatedAt.Day(), comment.CreatedAt.Hour(), comment.CreatedAt.Minute())
+		userListRpc, err := kitex_client.UserListRpc(ctx, []int64{userID})
+		if err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+
 		resp.Comment = &comment_api.Comment{
-			ID: int64(comment.ID),
+			ID: commentActionRpc.Comment.Id,
 			User: &user_api.User{
-				ID:              userinfo.User[0].UserId,
-				Name:            userinfo.User[0].Name,
-				FollowCount:     userinfo.User[0].FollowCount,
-				FollowerCount:   userinfo.User[0].FollowerCount,
+				ID:              userListRpc.Users[0].Id,
+				Name:            userListRpc.Users[0].Name,
+				FollowCount:     userListRpc.Users[0].FollowCount,
+				FollowerCount:   userListRpc.Users[0].FollowerCount,
 				IsFollow:        false, // 不能关注自己
-				Avatar:          userinfo.User[0].Avatar,
-				BackgroundImage: userinfo.User[0].Background,
-				Signature:       userinfo.User[0].Signature,
-				TotalFavorited:  userinfo.User[0].TotalFavorited,
-				WorkCount:       userinfo.User[0].TotalFavorited,
-				FavoriteCount:   userinfo.User[0].FavoriteCount,
+				Avatar:          userListRpc.Users[0].Avatar,
+				BackgroundImage: userListRpc.Users[0].Background,
+				Signature:       userListRpc.Users[0].Signature,
+				TotalFavorited:  userListRpc.Users[0].TotalFavorited,
+				WorkCount:       userListRpc.Users[0].TotalFavorited,
+				FavoriteCount:   userListRpc.Users[0].FavoriteCount,
 			},
-			Content:    *req.CommentText,
-			CreateDate: create_date,
+			Content:    commentActionRpc.Comment.Content,
+			CreateDate: commentActionRpc.Comment.CreateDate,
 		}
 		resp.StatusCode = 0
 		resp.StatusMsg = "successfully publish comment"
@@ -98,26 +89,19 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
-		var comment = &video_dal.Comment{
-			UserId:     user_id,
-			VideoRefer: uint(req.VideoID),
-			Model:      gorm.Model{ID: uint(*req.CommentID)},
-		}
-
-		if err := comment.DeleteComment(); err != nil {
+		if _, err = kitex_client.CommentActionRpc(ctx, 2, userID, req.VideoID, nil); err != nil {
 			resp.StatusCode = 1
-			resp.StatusMsg = err.Error()
+			resp.StatusMsg = "empty comment id"
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
-
-		resp.StatusCode = 0
-		resp.StatusMsg = "successfully delete comment"
 	default:
 		resp.StatusCode = 1
 		resp.StatusMsg = "Invalid action type"
 	}
 
+	resp.StatusCode = 0
+	resp.StatusMsg = "OK"
 	c.JSON(consts.StatusOK, resp)
 }
 
@@ -134,7 +118,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(comment_api.CommentListResp)
 
-	comments, err := video_dal.RetrieveComment(req.VideoID)
+	commentListRpc, err := kitex_client.CommentListRpc(ctx, req.VideoID)
 	if err != nil {
 		resp.StatusCode = 1
 		resp.StatusMsg = err.Error()
@@ -142,19 +126,12 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	var user_id_list = make([]int64, 0, len(comments))
-	for _, v := range comments {
-		user_id_list = append(user_id_list, v.UserId)
+	userIDList := make([]int64, 0, len(commentListRpc.Comment))
+	for _, v := range commentListRpc.Comment {
+		userIDList = append(userIDList, v.UserId)
 	}
 
-	if len(comments) == 0 { // 特判没有评论的情况
-		resp.StatusCode = 0
-		resp.StatusMsg = "OK"
-		c.JSON(consts.StatusOK, resp)
-		return
-	}
-
-	userinfo_list, err := kitex_client.UserinfoRpc(ctx, user_id_list)
+	userListRpc, err := kitex_client.UserListRpc(ctx, userIDList)
 	if err != nil {
 		resp.StatusCode = 1
 		resp.StatusMsg = err.Error()
@@ -162,26 +139,11 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	var isfollow_list = make([]bool, 0, len(comments))
+	var userID int64
 	if req.Token == nil || *req.Token == "" { // nil对应不存在token字段，""对应token值为空
-		for i := 0; i < len(comments); i++ {
-			isfollow_list = append(isfollow_list, false)
-		}
+		userID = 0
 	} else {
-		user_id, err := mw.TokenGetUserId(req.Token)
-		if err != nil {
-			resp.StatusCode = 1
-			resp.StatusMsg = err.Error()
-			c.JSON(consts.StatusOK, resp)
-			return
-		}
-
-		var from_user_id_list = make([]int64, 0, len(comments))
-		for i := 0; i < len(comments); i++ {
-			from_user_id_list = append(from_user_id_list, user_id)
-		}
-
-		isfollow_list, err = kitex_client.IsFollowRpc(ctx, from_user_id_list, user_id_list)
+		userID, err = mw.TokenGetUserId(req.Token)
 		if err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
@@ -190,26 +152,32 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		}
 	}
 
-	for k, v := range comments {
-		create_date := fmt.Sprintf("%d-%d-%d %d:%d", v.CreatedAt.Year(), v.CreatedAt.Month(), v.CreatedAt.Day(), v.CreatedAt.Hour(), v.CreatedAt.Minute())
+	isFollowRpc, err := kitex_client.IsFollowRpc(ctx, userID, userIDList)
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMsg = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
 
+	for i := 0; i < len(commentListRpc.Comment); i++ {
 		resp.CommentList = append(resp.CommentList, &comment_api.Comment{
-			ID: int64(v.ID),
+			ID: commentListRpc.Comment[i].Id,
 			User: &user_api.User{
-				ID:              userinfo_list.User[k].UserId,
-				Name:            userinfo_list.User[k].Name,
-				FollowCount:     userinfo_list.User[k].FollowCount,
-				FollowerCount:   userinfo_list.User[k].FollowerCount,
-				IsFollow:        isfollow_list[k],
-				Avatar:          userinfo_list.User[k].Avatar,
-				BackgroundImage: userinfo_list.User[k].Background,
-				Signature:       userinfo_list.User[k].Signature,
-				TotalFavorited:  userinfo_list.User[k].TotalFavorited,
-				WorkCount:       userinfo_list.User[k].WorkCount,
-				FavoriteCount:   userinfo_list.User[k].FavoriteCount,
+				ID:              userListRpc.Users[i].Id,
+				Name:            userListRpc.Users[i].Name,
+				FollowCount:     userListRpc.Users[i].FollowCount,
+				FollowerCount:   userListRpc.Users[i].FollowerCount,
+				IsFollow:        isFollowRpc.IsFollow[i],
+				Avatar:          userListRpc.Users[i].Avatar,
+				BackgroundImage: userListRpc.Users[i].Background,
+				Signature:       userListRpc.Users[i].Signature,
+				TotalFavorited:  userListRpc.Users[i].TotalFavorited,
+				WorkCount:       userListRpc.Users[i].WorkCount,
+				FavoriteCount:   userListRpc.Users[i].FavoriteCount,
 			},
-			Content:    v.Content,
-			CreateDate: create_date,
+			Content:    commentListRpc.Comment[i].Content,
+			CreateDate: commentListRpc.Comment[i].CreateDate,
 		})
 	}
 

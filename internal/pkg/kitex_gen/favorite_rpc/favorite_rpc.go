@@ -515,7 +515,7 @@ func (p *FavoriteActionResp) Field2DeepEqual(src string) bool {
 }
 
 type IsFavoriteReq struct {
-	UserId  []int64 `thrift:"user_id,1" frugal:"1,default,list<i64>" json:"user_id"`
+	UserId  int64   `thrift:"user_id,1" frugal:"1,default,i64" json:"user_id"`
 	VideoId []int64 `thrift:"video_id,2" frugal:"2,default,list<i64>" json:"video_id"`
 }
 
@@ -527,14 +527,14 @@ func (p *IsFavoriteReq) InitDefault() {
 	*p = IsFavoriteReq{}
 }
 
-func (p *IsFavoriteReq) GetUserId() (v []int64) {
+func (p *IsFavoriteReq) GetUserId() (v int64) {
 	return p.UserId
 }
 
 func (p *IsFavoriteReq) GetVideoId() (v []int64) {
 	return p.VideoId
 }
-func (p *IsFavoriteReq) SetUserId(val []int64) {
+func (p *IsFavoriteReq) SetUserId(val int64) {
 	p.UserId = val
 }
 func (p *IsFavoriteReq) SetVideoId(val []int64) {
@@ -566,7 +566,7 @@ func (p *IsFavoriteReq) Read(iprot thrift.TProtocol) (err error) {
 
 		switch fieldId {
 		case 1:
-			if fieldTypeId == thrift.LIST {
+			if fieldTypeId == thrift.I64 {
 				if err = p.ReadField1(iprot); err != nil {
 					goto ReadFieldError
 				}
@@ -616,23 +616,10 @@ ReadStructEndError:
 }
 
 func (p *IsFavoriteReq) ReadField1(iprot thrift.TProtocol) error {
-	_, size, err := iprot.ReadListBegin()
-	if err != nil {
+	if v, err := iprot.ReadI64(); err != nil {
 		return err
-	}
-	p.UserId = make([]int64, 0, size)
-	for i := 0; i < size; i++ {
-		var _elem int64
-		if v, err := iprot.ReadI64(); err != nil {
-			return err
-		} else {
-			_elem = v
-		}
-
-		p.UserId = append(p.UserId, _elem)
-	}
-	if err := iprot.ReadListEnd(); err != nil {
-		return err
+	} else {
+		p.UserId = v
 	}
 	return nil
 }
@@ -693,18 +680,10 @@ WriteStructEndError:
 }
 
 func (p *IsFavoriteReq) writeField1(oprot thrift.TProtocol) (err error) {
-	if err = oprot.WriteFieldBegin("user_id", thrift.LIST, 1); err != nil {
+	if err = oprot.WriteFieldBegin("user_id", thrift.I64, 1); err != nil {
 		goto WriteFieldBeginError
 	}
-	if err := oprot.WriteListBegin(thrift.I64, len(p.UserId)); err != nil {
-		return err
-	}
-	for _, v := range p.UserId {
-		if err := oprot.WriteI64(v); err != nil {
-			return err
-		}
-	}
-	if err := oprot.WriteListEnd(); err != nil {
+	if err := oprot.WriteI64(p.UserId); err != nil {
 		return err
 	}
 	if err = oprot.WriteFieldEnd(); err != nil {
@@ -764,16 +743,10 @@ func (p *IsFavoriteReq) DeepEqual(ano *IsFavoriteReq) bool {
 	return true
 }
 
-func (p *IsFavoriteReq) Field1DeepEqual(src []int64) bool {
+func (p *IsFavoriteReq) Field1DeepEqual(src int64) bool {
 
-	if len(p.UserId) != len(src) {
+	if p.UserId != src {
 		return false
-	}
-	for i, v := range p.UserId {
-		_src := src[i]
-		if v != _src {
-			return false
-		}
 	}
 	return true
 }

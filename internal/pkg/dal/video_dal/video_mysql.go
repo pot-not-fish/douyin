@@ -65,6 +65,10 @@ func (video *Video) CreateVideo() error {
 		return err
 	}
 
+	if err := video.Publish(); err != nil {
+		return err
+	}
+
 	go video.CreateVideoCache()
 
 	return nil

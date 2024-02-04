@@ -14,7 +14,7 @@ struct FavoriteActionResp {
 
 // 查看视频是否点赞
 struct IsFavoriteReq {
-    1: list<i64> user_id;  // 用户id列表
+    1: i64 user_id;  // 用户id列表
     2: list<i64> video_id; // 视频id列表
 }
 

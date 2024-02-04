@@ -7,6 +7,7 @@ struct Video {
     4: string title;       // 视频标题
     5: i64 favorite_count; // 视频点赞总数
     6: i64 comment_count;  // 评论数量
+    7: i64 user_id;        // 用户id
 }
 
 struct VideoFeedReq {

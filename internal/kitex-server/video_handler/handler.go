@@ -2,9 +2,9 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-01-30 11:46:25
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-02 13:43:03
+ * @LastEditTime: 2024-02-03 23:42:40
  * @Description:
- * @FilePath: \douyin\internal\kitex-server\video_handler\handler.go
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\video_handler\handler.go
  */
 package video_handler
 
@@ -19,15 +19,14 @@ type VideoServoceImpl struct{}
 func (v *VideoServoceImpl) VideoFeed(ctx context.Context, request *video_rpc.VideoFeedReq) (*video_rpc.VideoFeedResp, error) {
 	resp := new(video_rpc.VideoFeedResp)
 
-	video_list, next_offset, err := video_dal.VideoFeed(request.LastOffset, 10)
+	videoList, nextOffset, err := video_dal.VideoFeed(request.LastOffset, 10)
 	if err != nil {
 		resp.Code = 1
 		resp.Msg = err.Error()
 		return resp, nil
 	}
 
-	resp.NextOffset = next_offset
-	for _, v := range video_list {
+	for _, v := range videoList {
 		resp.Videos = append(resp.Videos, &video_rpc.Video{
 			Id:            int64(v.ID),
 			PlayUrl:       v.PlayUrl,
@@ -35,8 +34,10 @@ func (v *VideoServoceImpl) VideoFeed(ctx context.Context, request *video_rpc.Vid
 			Title:         v.Title,
 			FavoriteCount: v.FavoriteCount,
 			CommentCount:  v.CommentCount,
+			UserId:        v.UserID,
 		})
 	}
+	resp.NextOffset = nextOffset
 	resp.Code = 0
 	resp.Msg = "ok"
 	return resp, nil
@@ -60,6 +61,7 @@ func (v *VideoServoceImpl) VideoList(ctx context.Context, request *video_rpc.Vid
 			Title:         v.Title,
 			FavoriteCount: v.FavoriteCount,
 			CommentCount:  v.CommentCount,
+			UserId:        v.UserID,
 		})
 	}
 	resp.Code = 0
@@ -85,6 +87,7 @@ func (v *VideoServoceImpl) VideoInfo(ctx context.Context, request *video_rpc.Vid
 			Title:         v.Title,
 			FavoriteCount: v.FavoriteCount,
 			CommentCount:  v.CommentCount,
+			UserId:        v.UserID,
 		})
 	}
 	resp.Code = 0

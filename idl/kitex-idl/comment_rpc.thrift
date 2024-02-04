@@ -4,6 +4,7 @@ struct Comment {
     1: i64 id;             // 发布id
     2: string content;     // 发布内容
     3: string create_date; // 发布时间
+    4: i64 user_id;        // 发布用户的id
 }
 
 // 评论操作请求

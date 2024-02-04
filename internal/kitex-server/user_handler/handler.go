@@ -2,9 +2,9 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-13 10:37:00
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-02 17:53:25
+ * @LastEditTime: 2024-02-03 23:38:09
  * @Description:
- * @FilePath: \douyin\internal\kitex-server\user_handler\handler.go
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\user_handler\handler.go
  */
 package user_handler
 
@@ -21,14 +21,14 @@ type UserServiceImpl struct{}
 func (u *UserServiceImpl) UserList(ctx context.Context, request *user_rpc.UserListReq) (*user_rpc.UserListResp, error) {
 	resp := new(user_rpc.UserListResp)
 
-	userinfo_list, err := user_dal.RetreiveUsers(request.UserinfoId)
+	userInfoList, err := user_dal.RetreiveUsers(request.UserinfoId)
 	if err != nil {
 		resp.Code = 1
 		resp.Msg = err.Error()
 		return resp, nil
 	}
 
-	for _, v := range userinfo_list {
+	for _, v := range userInfoList {
 		resp.Users = append(resp.Users, &user_rpc.User{
 			Id:             int64(v.ID),
 			Name:           v.Name,

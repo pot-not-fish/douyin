@@ -1,3 +1,11 @@
+/*
+ * @Author: LIKE_A_STAR
+ * @Date: 2024-01-14 12:05:03
+ * @LastEditors: LIKE_A_STAR
+ * @LastEditTime: 2024-02-03 23:37:49
+ * @Description:
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\follow_handler\handler.go
+ */
 package follow_handler
 
 import (
@@ -63,17 +71,17 @@ func (f *FollowServiceImpl) RelationList(ctx context.Context, request *follow_rp
 	var err error
 	resp := new(follow_rpc.RelationListResp)
 
-	relation_info := new(relation_dal.RelationInfo)
+	relationInfo := new(relation_dal.RelationInfo)
 	switch request.ActionType {
 	case 1:
-		relation_info, err = relation_dal.RetrieveFollow(request.UserId, request.OwnerId)
+		relationInfo, err = relation_dal.RetrieveFollow(request.UserId, request.OwnerId)
 		if err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
 			return resp, nil
 		}
 	case 2:
-		relation_info, err = relation_dal.RetrieveFollower(request.UserId, request.OwnerId)
+		relationInfo, err = relation_dal.RetrieveFollower(request.UserId, request.OwnerId)
 		if err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
@@ -85,8 +93,8 @@ func (f *FollowServiceImpl) RelationList(ctx context.Context, request *follow_rp
 		return resp, nil
 	}
 
-	resp.IsFollow = relation_info.IsFollowList
-	resp.UserId = relation_info.RelationList
+	resp.IsFollow = relationInfo.IsFollowList
+	resp.UserId = relationInfo.RelationList
 	resp.Code = 0
 	resp.Msg = "ok"
 	return resp, nil

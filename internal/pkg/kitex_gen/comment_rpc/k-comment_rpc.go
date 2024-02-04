@@ -87,6 +87,20 @@ func (p *Comment) FastRead(buf []byte) (int, error) {
 					goto SkipFieldError
 				}
 			}
+		case 4:
+			if fieldTypeId == thrift.I64 {
+				l, err = p.FastReadField4(buf[offset:])
+				offset += l
+				if err != nil {
+					goto ReadFieldError
+				}
+			} else {
+				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
+				offset += l
+				if err != nil {
+					goto SkipFieldError
+				}
+			}
 		default:
 			l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
 			offset += l
@@ -164,6 +178,20 @@ func (p *Comment) FastReadField3(buf []byte) (int, error) {
 	return offset, nil
 }
 
+func (p *Comment) FastReadField4(buf []byte) (int, error) {
+	offset := 0
+
+	if v, l, err := bthrift.Binary.ReadI64(buf[offset:]); err != nil {
+		return offset, err
+	} else {
+		offset += l
+
+		p.UserId = v
+
+	}
+	return offset, nil
+}
+
 // for compatibility
 func (p *Comment) FastWrite(buf []byte) int {
 	return 0
@@ -174,6 +202,7 @@ func (p *Comment) FastWriteNocopy(buf []byte, binaryWriter bthrift.BinaryWriter)
 	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "Comment")
 	if p != nil {
 		offset += p.fastWriteField1(buf[offset:], binaryWriter)
+		offset += p.fastWriteField4(buf[offset:], binaryWriter)
 		offset += p.fastWriteField2(buf[offset:], binaryWriter)
 		offset += p.fastWriteField3(buf[offset:], binaryWriter)
 	}
@@ -189,6 +218,7 @@ func (p *Comment) BLength() int {
 		l += p.field1Length()
 		l += p.field2Length()
 		l += p.field3Length()
+		l += p.field4Length()
 	}
 	l += bthrift.Binary.FieldStopLength()
 	l += bthrift.Binary.StructEndLength()
@@ -222,6 +252,15 @@ func (p *Comment) fastWriteField3(buf []byte, binaryWriter bthrift.BinaryWriter)
 	return offset
 }
 
+func (p *Comment) fastWriteField4(buf []byte, binaryWriter bthrift.BinaryWriter) int {
+	offset := 0
+	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "user_id", thrift.I64, 4)
+	offset += bthrift.Binary.WriteI64(buf[offset:], p.UserId)
+
+	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
+	return offset
+}
+
 func (p *Comment) field1Length() int {
 	l := 0
 	l += bthrift.Binary.FieldBeginLength("id", thrift.I64, 1)
@@ -244,6 +283,15 @@ func (p *Comment) field3Length() int {
 	l := 0
 	l += bthrift.Binary.FieldBeginLength("create_date", thrift.STRING, 3)
 	l += bthrift.Binary.StringLengthNocopy(p.CreateDate)
+
+	l += bthrift.Binary.FieldEndLength()
+	return l
+}
+
+func (p *Comment) field4Length() int {
+	l := 0
+	l += bthrift.Binary.FieldBeginLength("user_id", thrift.I64, 4)
+	l += bthrift.Binary.I64Length(p.UserId)
 
 	l += bthrift.Binary.FieldEndLength()
 	return l

@@ -8,8 +8,6 @@ import (
 	favorite_api "douyin/internal/hertz-server/model/favorite_api"
 	"douyin/internal/hertz-server/model/user_api"
 	"douyin/internal/hertz-server/model/video_api"
-	"douyin/internal/pkg/dal/user_dal"
-	"douyin/internal/pkg/dal/video_dal"
 	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/mw"
 
@@ -30,16 +28,16 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(favorite_api.FavoriteActionResp)
 
-	row_user_id, ok := c.Get("user_id")
+	rowUserID, ok := c.Get("user_id")
 	if !ok {
 		resp.StatusCode = 1
 		resp.StatusMsg = "could not find user_id"
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
-	user_id := row_user_id.(int64)
+	userID := rowUserID.(int64)
 
-	video_user_id, err := video_dal.RetrieveUser(req.VideoID)
+	videoList, err := kitex_client.VideoInfoRpc(ctx, []int64{req.VideoID})
 	if err != nil {
 		resp.StatusCode = 1
 		resp.StatusMsg = err.Error()
@@ -47,36 +45,44 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	var favorite = video_dal.Favorite{
-		UserId:      user_id,
-		VideoId:     req.VideoID,
-		VideoUserId: video_user_id,
-	}
-
 	switch req.ActionType {
 	case 1: // 点赞
-		if err := favorite.CreateFavorite(); err != nil {
+		if err := kitex_client.FavoriteActionRpc(ctx, 1, userID, req.VideoID); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
 
-		if err := user_dal.IncFavorite(user_id, video_user_id); err != nil {
+		if err := kitex_client.UserInfoActionRpc(ctx, 1, userID, &videoList.Videos[0].UserId); err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+
+		if err := kitex_client.VideoInfoActionRpc(ctx, 3, req.VideoID); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
 	case 2: // 取消点赞
-		if err := favorite.DeleteFavorite(); err != nil {
+		if err := kitex_client.FavoriteActionRpc(ctx, 2, userID, req.VideoID); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
 
-		if err := user_dal.DecFavorite(user_id, video_user_id); err != nil {
+		if err := kitex_client.UserInfoActionRpc(ctx, 2, userID, &videoList.Videos[0].UserId); err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+
+		if err := kitex_client.VideoInfoActionRpc(ctx, 4, req.VideoID); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
@@ -107,61 +113,11 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(favorite_api.FavoriteListResp)
 
-	videos, err := video_dal.RetrieveFavoriteVideo(req.UserID)
-	if err != nil {
-		resp.StatusCode = 1
-		resp.StatusMsg = err.Error()
-		c.JSON(consts.StatusOK, resp)
-		return
-	}
-
-	var user_id_list = make([]int64, 0, len(*videos))
-	for _, v := range *videos {
-		user_id_list = append(user_id_list, v.UserId)
-	}
-	userinfo_list, err := kitex_client.UserinfoRpc(ctx, user_id_list)
-	if err != nil {
-		resp.StatusCode = 1
-		resp.StatusMsg = err.Error()
-		c.JSON(consts.StatusOK, resp)
-		return
-	}
-
-	var isfollow_list = make([]bool, 0, len(*videos))
-	var isfavorite_list = make([]bool, 0, len(*videos))
+	var userID int64
 	if req.Token == nil || *req.Token == "" { // nil对应不存在token字段，""对应token值为空
-		for i := 0; i < len(*videos); i++ {
-			isfollow_list = append(isfollow_list, false)
-			isfavorite_list = append(isfavorite_list, false)
-		}
+		userID = 0
 	} else {
-		user_id, err := mw.TokenGetUserId(req.Token)
-		if err != nil {
-			resp.StatusCode = 1
-			resp.StatusMsg = err.Error()
-			c.JSON(consts.StatusOK, resp)
-			return
-		}
-
-		var from_user_id_list []int64
-		for i := 0; i < len(*videos); i++ {
-			from_user_id_list = append(from_user_id_list, user_id)
-		}
-
-		var video_id_list []int64
-		for _, v := range *videos {
-			video_id_list = append(video_id_list, int64(v.ID))
-		}
-
-		isfollow_list, err = kitex_client.IsFollowRpc(ctx, from_user_id_list, user_id_list)
-		if err != nil {
-			resp.StatusCode = 1
-			resp.StatusMsg = err.Error()
-			c.JSON(consts.StatusOK, resp)
-			return
-		}
-
-		isfavorite_list, err = kitex_client.IsFavoriteRpc(ctx, from_user_id_list, video_id_list)
+		userID, err = mw.TokenGetUserId(req.Token)
 		if err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
@@ -170,28 +126,72 @@ func FavoriteList(ctx context.Context, c *app.RequestContext) {
 		}
 	}
 
-	for k, v := range *videos {
+	favoriteVideoList, err := kitex_client.FavoriteVideoRpc(ctx, userID, req.UserID)
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMsg = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+
+	videoListRpc, err := kitex_client.VideoInfoRpc(ctx, favoriteVideoList.VideoId)
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMsg = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+
+	ownerIDList := make([]int64, 0, len(videoListRpc.Videos))
+	for _, v := range videoListRpc.Videos {
+		ownerIDList = append(ownerIDList, v.UserId)
+	}
+	userListRpc, err := kitex_client.UserListRpc(ctx, ownerIDList)
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMsg = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+
+	isFollowRpc, err := kitex_client.IsFollowRpc(ctx, userID, ownerIDList)
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMsg = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+
+	isFavoriteRpc, err := kitex_client.IsFavoriteRpc(ctx, userID, favoriteVideoList.VideoId)
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMsg = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+
+	for i := 0; i < len(videoListRpc.Videos); i++ {
 		resp.VideoList = append(resp.VideoList, &video_api.Video{
-			ID: int64(v.ID),
+			ID: videoListRpc.Videos[i].Id,
 			Author: &user_api.User{
-				ID:              userinfo_list.User[k].UserId,
-				Name:            userinfo_list.User[k].Name,
-				FollowCount:     userinfo_list.User[k].FollowCount,
-				FollowerCount:   userinfo_list.User[k].FollowerCount,
-				IsFollow:        isfollow_list[k],
-				Avatar:          userinfo_list.User[k].Avatar,
-				BackgroundImage: userinfo_list.User[k].Background,
-				Signature:       userinfo_list.User[k].Signature,
-				TotalFavorited:  userinfo_list.User[k].TotalFavorited,
-				WorkCount:       userinfo_list.User[k].WorkCount,
-				FavoriteCount:   userinfo_list.User[k].FavoriteCount,
+				ID:              userListRpc.Users[i].Id,
+				Name:            userListRpc.Users[i].Name,
+				FollowCount:     userListRpc.Users[i].FollowCount,
+				FollowerCount:   userListRpc.Users[i].FollowerCount,
+				IsFollow:        isFollowRpc.IsFollow[i],
+				Avatar:          userListRpc.Users[i].Avatar,
+				BackgroundImage: userListRpc.Users[i].Background,
+				Signature:       userListRpc.Users[i].Signature,
+				TotalFavorited:  userListRpc.Users[i].TotalFavorited,
+				WorkCount:       userListRpc.Users[i].WorkCount,
+				FavoriteCount:   userListRpc.Users[i].FavoriteCount,
 			},
-			PlayURL:       "https://840231514-1320167793.cos.ap-nanjing.myqcloud.com" + v.PlayUrl,
-			CoverURL:      "https://840231514-1320167793.cos.ap-nanjing.myqcloud.com" + v.CoverUrl,
-			FavoriteCount: v.FavoriteCount,
-			CommentCount:  v.CommentCount,
-			IsFavorite:    isfavorite_list[k],
-			Title:         v.Title,
+			PlayURL:       "https://840231514-1320167793.cos.ap-nanjing.myqcloud.com" + videoListRpc.Videos[i].PlayUrl,
+			CoverURL:      "https://840231514-1320167793.cos.ap-nanjing.myqcloud.com" + videoListRpc.Videos[i].CoverUrl,
+			FavoriteCount: videoListRpc.Videos[i].FavoriteCount,
+			CommentCount:  videoListRpc.Videos[i].CommentCount,
+			IsFavorite:    isFavoriteRpc.IsFavorite[i],
+			Title:         videoListRpc.Videos[i].Title,
 		})
 	}
 

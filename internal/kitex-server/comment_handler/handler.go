@@ -1,3 +1,11 @@
+/*
+ * @Author: LIKE_A_STAR
+ * @Date: 2024-01-30 11:28:46
+ * @LastEditors: LIKE_A_STAR
+ * @LastEditTime: 2024-02-04 16:15:23
+ * @Description:
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\comment_handler\handler.go
+ */
 package comment_handler
 
 import (
@@ -31,6 +39,14 @@ func (c *CommentServiceImpl) CommentAction(ctx context.Context, request *comment
 			resp.Code = 1
 			resp.Msg = err.Error()
 			return resp, nil
+		}
+
+		create_date := fmt.Sprintf("%d-%d-%d %d:%d", comment.CreatedAt.Year(), comment.CreatedAt.Month(), comment.CreatedAt.Day(), comment.CreatedAt.Hour(), comment.CreatedAt.Minute())
+		resp.Comment = &comment_rpc.Comment{
+			Id:         int64(comment.ID),
+			Content:    *request.CommentText,
+			CreateDate: create_date,
+			UserId:     request.UserId,
 		}
 	case 2:
 		if err = comment.DeleteComment(); err != nil {

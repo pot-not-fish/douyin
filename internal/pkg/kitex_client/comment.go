@@ -20,7 +20,7 @@ import (
  * @param action_type 操作码 1-评论，2-删除评论
  * @return
  */
-func CommentAction(ctx context.Context, action_type int16, user_id, video_id int64, content *string) (*comment_rpc.CommentActionResp, error) {
+func CommentActionRpc(ctx context.Context, action_type int16, user_id, video_id int64, content *string) (*comment_rpc.CommentActionResp, error) {
 	respRpc, err := CommentClient.CommentAction(ctx, &comment_rpc.CommentActionReq{
 		ActionType:  action_type,
 		UserId:      user_id,
@@ -44,7 +44,7 @@ func CommentAction(ctx context.Context, action_type int16, user_id, video_id int
  * @param
  * @return
  */
-func CommentList(ctx context.Context, video_id int64) (*comment_rpc.CommentListResp, error) {
+func CommentListRpc(ctx context.Context, video_id int64) (*comment_rpc.CommentListResp, error) {
 	respRpc, err := CommentClient.CommentList(ctx, &comment_rpc.CommentListReq{
 		VideoId: video_id,
 	})

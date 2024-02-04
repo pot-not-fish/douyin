@@ -7,7 +7,6 @@ import (
 
 	follow_api "douyin/internal/hertz-server/model/follow_api"
 	"douyin/internal/hertz-server/model/user_api"
-	"douyin/internal/pkg/dal/user_dal"
 	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/mw"
 
@@ -28,35 +27,39 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(follow_api.RelationActionResp)
 
-	row_user_id, ok := c.Get("user_id")
+	rowUserID, ok := c.Get("user_id")
 	if !ok {
 		resp.StatusCode = 1
 		resp.StatusMsg = "missing user_id"
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
-	user_id := row_user_id.(int64)
+	userID := rowUserID.(int64)
 
 	switch req.ActionType {
 	case 1:
-		var relation = &user_dal.Relation{
-			FollowId:   req.ToUserID,
-			FollowerId: user_id,
+		if err = kitex_client.RelationActionRpc(ctx, 1, userID, req.ToUserID); err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
+			c.JSON(consts.StatusOK, resp)
+			return
 		}
 
-		if err = relation.CreateRelation(); err != nil {
+		if err = kitex_client.UserInfoActionRpc(ctx, 4, userID, &req.ToUserID); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
 	case 2:
-		var relation = &user_dal.Relation{
-			FollowId:   req.ToUserID,
-			FollowerId: user_id,
+		if err = kitex_client.RelationActionRpc(ctx, 2, userID, req.ToUserID); err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
+			c.JSON(consts.StatusOK, resp)
+			return
 		}
 
-		if err = relation.DeleteRelation(); err != nil {
+		if err = kitex_client.UserInfoActionRpc(ctx, 5, userID, &req.ToUserID); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
@@ -87,46 +90,11 @@ func RelationFollow(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(follow_api.FollowListResp)
 
-	relation_id_list, err := user_dal.RetrieveFollows(req.UserID)
-	if err != nil {
-		resp.StatusCode = 1
-		resp.StatusMsg = err.Error()
-		c.JSON(consts.StatusOK, resp)
-		return
-	}
-
-	if len(relation_id_list) == 0 { // 特判用户没有任何关注的情况
-		resp.StatusCode = 0
-		resp.StatusMsg = "OK"
-		c.JSON(consts.StatusOK, resp)
-		return
-	}
-
-	var follow_id_list = make([]int64, 0, len(relation_id_list))
-	for _, v := range relation_id_list {
-		follow_id_list = append(follow_id_list, v.FollowId)
-	}
-
-	var isfollow_list = make([]bool, 0, len(relation_id_list))
+	var userID int64
 	if req.Token == nil || *req.Token == "" { // nil对应不存在token字段，""对应token值为空
-		for i := 0; i < len(relation_id_list); i++ {
-			isfollow_list = append(isfollow_list, false)
-		}
+		userID = 0
 	} else {
-		user_id, err := mw.TokenGetUserId(req.Token)
-		if err != nil {
-			resp.StatusCode = 1
-			resp.StatusMsg = err.Error()
-			c.JSON(consts.StatusOK, resp)
-			return
-		}
-
-		var user_id_list = make([]int64, 0, len(relation_id_list))
-		for i := 0; i < len(relation_id_list); i++ {
-			user_id_list = append(user_id_list, user_id)
-		}
-
-		isfollow_list, err = kitex_client.IsFollowRpc(ctx, user_id_list, follow_id_list)
+		userID, err = mw.TokenGetUserId(req.Token)
 		if err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
@@ -135,7 +103,7 @@ func RelationFollow(ctx context.Context, c *app.RequestContext) {
 		}
 	}
 
-	userinfo_list, err := kitex_client.UserinfoRpc(ctx, follow_id_list)
+	relationRpc, err := kitex_client.RelationListRpc(ctx, 1, userID, req.UserID)
 	if err != nil {
 		resp.StatusCode = 1
 		resp.StatusMsg = err.Error()
@@ -143,19 +111,27 @@ func RelationFollow(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	for k, v := range userinfo_list.User {
+	userRpc, err := kitex_client.UserListRpc(ctx, relationRpc.UserId)
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMsg = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+
+	for i := 0; i < len(userRpc.Users); i++ {
 		resp.UserList = append(resp.UserList, &user_api.User{
-			ID:              v.UserId,
-			Name:            v.Name,
-			FollowCount:     v.FollowCount,
-			FollowerCount:   v.FollowerCount,
-			IsFollow:        isfollow_list[k],
-			Avatar:          v.Avatar,
-			BackgroundImage: v.Background,
-			Signature:       v.Signature,
-			TotalFavorited:  v.TotalFavorited,
-			WorkCount:       v.WorkCount,
-			FavoriteCount:   v.FavoriteCount,
+			ID:              userRpc.Users[i].Id,
+			Name:            userRpc.Users[i].Name,
+			FollowCount:     userRpc.Users[i].FollowCount,
+			FollowerCount:   userRpc.Users[i].FollowerCount,
+			IsFollow:        relationRpc.IsFollow[i],
+			Avatar:          userRpc.Users[i].Avatar,
+			BackgroundImage: userRpc.Users[i].Background,
+			Signature:       userRpc.Users[i].Signature,
+			TotalFavorited:  userRpc.Users[i].TotalFavorited,
+			WorkCount:       userRpc.Users[i].WorkCount,
+			FavoriteCount:   userRpc.Users[i].FavoriteCount,
 		})
 	}
 
@@ -177,46 +153,11 @@ func RelationFollower(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(follow_api.FollowerListResp)
 
-	relation_id_list, err := user_dal.RetrieveFollowers(req.UserID)
-	if err != nil {
-		resp.StatusCode = 1
-		resp.StatusMsg = err.Error()
-		c.JSON(consts.StatusOK, resp)
-		return
-	}
-
-	if len(relation_id_list) == 0 { // 特判用户没有任何关注的情况下
-		resp.StatusCode = 0
-		resp.StatusMsg = "OK"
-		c.JSON(consts.StatusOK, resp)
-		return
-	}
-
-	var follower_id_list = make([]int64, 0, len(relation_id_list))
-	for _, v := range relation_id_list {
-		follower_id_list = append(follower_id_list, v.FollowerId)
-	}
-
-	var isfollow_list = make([]bool, 0, len(relation_id_list))
+	var userID int64
 	if req.Token == nil || *req.Token == "" { // nil对应不存在token字段，""对应token值为空
-		for i := 0; i < len(relation_id_list); i++ {
-			isfollow_list = append(isfollow_list, false)
-		}
+		userID = 0
 	} else {
-		user_id, err := mw.TokenGetUserId(req.Token)
-		if err != nil {
-			resp.StatusCode = 1
-			resp.StatusMsg = err.Error()
-			c.JSON(consts.StatusOK, resp)
-			return
-		}
-
-		var user_id_list = make([]int64, 0, len(relation_id_list))
-		for i := 0; i < len(relation_id_list); i++ {
-			user_id_list = append(user_id_list, user_id)
-		}
-
-		isfollow_list, err = kitex_client.IsFollowRpc(ctx, user_id_list, follower_id_list)
+		userID, err = mw.TokenGetUserId(req.Token)
 		if err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
@@ -225,7 +166,7 @@ func RelationFollower(ctx context.Context, c *app.RequestContext) {
 		}
 	}
 
-	userinfo_list, err := kitex_client.UserinfoRpc(ctx, follower_id_list)
+	relationRpc, err := kitex_client.RelationListRpc(ctx, 2, userID, req.UserID)
 	if err != nil {
 		resp.StatusCode = 1
 		resp.StatusMsg = err.Error()
@@ -233,19 +174,27 @@ func RelationFollower(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	for k, v := range userinfo_list.User {
+	userRpc, err := kitex_client.UserListRpc(ctx, relationRpc.UserId)
+	if err != nil {
+		resp.StatusCode = 1
+		resp.StatusMsg = err.Error()
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+
+	for i := 0; i < len(userRpc.Users); i++ {
 		resp.UserList = append(resp.UserList, &user_api.User{
-			ID:              v.UserId,
-			Name:            v.Name,
-			FollowCount:     v.FollowCount,
-			FollowerCount:   v.FollowerCount,
-			IsFollow:        isfollow_list[k],
-			Avatar:          v.Avatar,
-			BackgroundImage: v.Background,
-			Signature:       v.Signature,
-			TotalFavorited:  v.TotalFavorited,
-			WorkCount:       v.WorkCount,
-			FavoriteCount:   v.FavoriteCount,
+			ID:              userRpc.Users[i].Id,
+			Name:            userRpc.Users[i].Name,
+			FollowCount:     userRpc.Users[i].FollowCount,
+			FollowerCount:   userRpc.Users[i].FollowerCount,
+			IsFollow:        relationRpc.IsFollow[i],
+			Avatar:          userRpc.Users[i].Avatar,
+			BackgroundImage: userRpc.Users[i].Background,
+			Signature:       userRpc.Users[i].Signature,
+			TotalFavorited:  userRpc.Users[i].TotalFavorited,
+			WorkCount:       userRpc.Users[i].WorkCount,
+			FavoriteCount:   userRpc.Users[i].FavoriteCount,
 		})
 	}
 

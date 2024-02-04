@@ -43,14 +43,14 @@ func (f *FavoriteServiceImpl) FavoriteAction(ctx context.Context, request *favor
 func (f *FavoriteServiceImpl) IsFavorite(ctx context.Context, request *favorite_rpc.IsFavoriteReq) (*favorite_rpc.IsFavoriteResp, error) {
 	resp := new(favorite_rpc.IsFavoriteResp)
 
-	is_favorite_list, err := favorite_dal.IsFavorite(request.UserId, request.VideoId)
+	isFavoriteList, err := favorite_dal.IsFavorite(request.UserId, request.VideoId)
 	if err != nil {
 		resp.Code = 1
 		resp.Msg = err.Error()
 		return resp, nil
 	}
 
-	resp.IsFavorite = is_favorite_list
+	resp.IsFavorite = isFavoriteList
 	resp.Code = 0
 	resp.Msg = "ok"
 	return resp, nil

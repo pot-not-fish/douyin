@@ -2,9 +2,9 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-02-02 13:46:12
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-02 23:38:43
+ * @LastEditTime: 2024-02-04 14:04:54
  * @Description:
- * @FilePath: \douyin\internal\pkg\kitex_client\video.go
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\kitex_client\video.go
  */
 package kitex_client
 
@@ -20,7 +20,7 @@ import (
  * @param
  * @return
  */
-func VideoFeed(ctx context.Context, last_offset int64) (*video_rpc.VideoFeedResp, error) {
+func VideoFeedRpc(ctx context.Context, last_offset int64) (*video_rpc.VideoFeedResp, error) {
 	respRpc, err := VideoClient.VideoFeed(ctx, &video_rpc.VideoFeedReq{
 		LastOffset: last_offset,
 	})
@@ -41,7 +41,7 @@ func VideoFeed(ctx context.Context, last_offset int64) (*video_rpc.VideoFeedResp
  * @param
  * @return
  */
-func VideoList(ctx context.Context, owner_id int64) (*video_rpc.VideoListResp, error) {
+func VideoListRpc(ctx context.Context, owner_id int64) (*video_rpc.VideoListResp, error) {
 	respRpc, err := VideoClient.VideoList(ctx, &video_rpc.VideoListReq{
 		OwnerId: owner_id,
 	})
@@ -62,7 +62,7 @@ func VideoList(ctx context.Context, owner_id int64) (*video_rpc.VideoListResp, e
  * @param
  * @return
  */
-func VideoInfo(ctx context.Context, video_id []int64) (*video_rpc.VideoListResp, error) {
+func VideoInfoRpc(ctx context.Context, video_id []int64) (*video_rpc.VideoListResp, error) {
 	respRpc, err := VideoClient.VideoInfo(ctx, &video_rpc.VideoInfoReq{
 		VideoId: video_id,
 	})
@@ -83,7 +83,7 @@ func VideoInfo(ctx context.Context, video_id []int64) (*video_rpc.VideoListResp,
  * @param
  * @return
  */
-func VideoAction(ctx context.Context, user_id int64, title, cover_url, play_url string) (*video_rpc.VideoActionResp, error) {
+func VideoActionRpc(ctx context.Context, user_id int64, title, cover_url, play_url string) error {
 	respRpc, err := VideoClient.VideoAction(ctx, &video_rpc.VideoActionReq{
 		UserId:   user_id,
 		Title:    title,
@@ -91,14 +91,14 @@ func VideoAction(ctx context.Context, user_id int64, title, cover_url, play_url 
 		PlayUrl:  play_url,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if respRpc.Code != 0 {
-		return nil, fmt.Errorf(respRpc.Msg)
+		return fmt.Errorf(respRpc.Msg)
 	}
 
-	return respRpc, nil
+	return nil
 }
 
 /**
@@ -107,18 +107,18 @@ func VideoAction(ctx context.Context, user_id int64, title, cover_url, play_url 
  * @param action_type 操作码 1-自增评论 2-自减评论 3-自增点赞量 4-自减点赞量
  * @return
  */
-func VideoInfoAction(ctx context.Context, action_type int16, video_id int64) (*video_rpc.VideoInfoActionResp, error) {
+func VideoInfoActionRpc(ctx context.Context, action_type int16, video_id int64) error {
 	respRpc, err := VideoClient.VideoInfoAction(ctx, &video_rpc.VideoInfoActionReq{
 		ActionType: action_type,
 		VideoId:    video_id,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if respRpc.Code != 0 {
-		return nil, fmt.Errorf(respRpc.Msg)
+		return fmt.Errorf(respRpc.Msg)
 	}
 
-	return respRpc, nil
+	return nil
 }

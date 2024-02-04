@@ -20,9 +20,6 @@ var (
 	// 数据库指针未初始化
 	ErrNullDB = fmt.Errorf("nullptr database")
 
-	// 查询是否点赞的用户列表和视频列表不等
-	ErrInEqualList = fmt.Errorf("invalid user and video list")
-
 	// 用户id列表为空
 	ErrEmptyUserID = fmt.Errorf("empty user id")
 )

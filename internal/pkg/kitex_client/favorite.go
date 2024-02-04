@@ -2,9 +2,9 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-27 11:01:52
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-02 23:39:20
+ * @LastEditTime: 2024-02-04 16:31:58
  * @Description:
- * @FilePath: \douyin\internal\pkg\kitex_client\favorite.go
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\kitex_client\favorite.go
  */
 package kitex_client
 
@@ -20,21 +20,21 @@ import (
  * @param action_type 操作码 1-点赞，2-取消点赞
  * @return
  */
-func FavoriteActionRpc(ctx context.Context, action_type int16, user_id, video_id int64) (*favorite_rpc.FavoriteActionResp, error) {
+func FavoriteActionRpc(ctx context.Context, action_type int16, user_id, video_id int64) error {
 	respRpc, err := FavoriteClient.FavoriteAction(ctx, &favorite_rpc.FavoriteActionReq{
 		ActionType: action_type,
 		UserId:     user_id,
 		VideoId:    video_id,
 	})
 	if err != nil {
-		return nil, err
+		return err
 	}
 
 	if respRpc.Code != 0 {
-		return nil, fmt.Errorf(respRpc.Msg)
+		return fmt.Errorf(respRpc.Msg)
 	}
 
-	return respRpc, nil
+	return nil
 }
 
 /**
@@ -43,10 +43,10 @@ func FavoriteActionRpc(ctx context.Context, action_type int16, user_id, video_id
  * @param
  * @return
  */
-func IsFavoriteRpc(ctx context.Context, userid []int64, videoid []int64) (*favorite_rpc.IsFavoriteResp, error) {
+func IsFavoriteRpc(ctx context.Context, user_id int64, video_id_list []int64) (*favorite_rpc.IsFavoriteResp, error) {
 	respRpc, err := FavoriteClient.IsFavorite(ctx, &favorite_rpc.IsFavoriteReq{
-		UserId:  userid,
-		VideoId: videoid,
+		UserId:  user_id,
+		VideoId: video_id_list,
 	})
 	if err != nil {
 		return nil, err
@@ -65,9 +65,9 @@ func IsFavoriteRpc(ctx context.Context, userid []int64, videoid []int64) (*favor
  * @param
  * @return
  */
-func FavoriteVideo(ctx context.Context, userid, owner_id int64) (*favorite_rpc.FavoriteVideoResp, error) {
+func FavoriteVideoRpc(ctx context.Context, user_id, owner_id int64) (*favorite_rpc.FavoriteVideoResp, error) {
 	respRpc, err := FavoriteClient.FavoriteVideo(ctx, &favorite_rpc.FavoriteVideoReq{
-		UserId:  userid,
+		UserId:  user_id,
 		OwnerId: owner_id,
 	})
 	if err != nil {
