@@ -919,20 +919,6 @@ func (p *FavoriteVideoReq) FastRead(buf []byte) (int, error) {
 					goto SkipFieldError
 				}
 			}
-		case 2:
-			if fieldTypeId == thrift.I64 {
-				l, err = p.FastReadField2(buf[offset:])
-				offset += l
-				if err != nil {
-					goto ReadFieldError
-				}
-			} else {
-				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
-				offset += l
-				if err != nil {
-					goto SkipFieldError
-				}
-			}
 		default:
 			l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
 			offset += l
@@ -982,20 +968,6 @@ func (p *FavoriteVideoReq) FastReadField1(buf []byte) (int, error) {
 	return offset, nil
 }
 
-func (p *FavoriteVideoReq) FastReadField2(buf []byte) (int, error) {
-	offset := 0
-
-	if v, l, err := bthrift.Binary.ReadI64(buf[offset:]); err != nil {
-		return offset, err
-	} else {
-		offset += l
-
-		p.OwnerId = v
-
-	}
-	return offset, nil
-}
-
 // for compatibility
 func (p *FavoriteVideoReq) FastWrite(buf []byte) int {
 	return 0
@@ -1006,7 +978,6 @@ func (p *FavoriteVideoReq) FastWriteNocopy(buf []byte, binaryWriter bthrift.Bina
 	offset += bthrift.Binary.WriteStructBegin(buf[offset:], "FavoriteVideoReq")
 	if p != nil {
 		offset += p.fastWriteField1(buf[offset:], binaryWriter)
-		offset += p.fastWriteField2(buf[offset:], binaryWriter)
 	}
 	offset += bthrift.Binary.WriteFieldStop(buf[offset:])
 	offset += bthrift.Binary.WriteStructEnd(buf[offset:])
@@ -1018,7 +989,6 @@ func (p *FavoriteVideoReq) BLength() int {
 	l += bthrift.Binary.StructBeginLength("FavoriteVideoReq")
 	if p != nil {
 		l += p.field1Length()
-		l += p.field2Length()
 	}
 	l += bthrift.Binary.FieldStopLength()
 	l += bthrift.Binary.StructEndLength()
@@ -1034,28 +1004,10 @@ func (p *FavoriteVideoReq) fastWriteField1(buf []byte, binaryWriter bthrift.Bina
 	return offset
 }
 
-func (p *FavoriteVideoReq) fastWriteField2(buf []byte, binaryWriter bthrift.BinaryWriter) int {
-	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "owner_id", thrift.I64, 2)
-	offset += bthrift.Binary.WriteI64(buf[offset:], p.OwnerId)
-
-	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
-	return offset
-}
-
 func (p *FavoriteVideoReq) field1Length() int {
 	l := 0
 	l += bthrift.Binary.FieldBeginLength("user_id", thrift.I64, 1)
 	l += bthrift.Binary.I64Length(p.UserId)
-
-	l += bthrift.Binary.FieldEndLength()
-	return l
-}
-
-func (p *FavoriteVideoReq) field2Length() int {
-	l := 0
-	l += bthrift.Binary.FieldBeginLength("owner_id", thrift.I64, 2)
-	l += bthrift.Binary.I64Length(p.OwnerId)
 
 	l += bthrift.Binary.FieldEndLength()
 	return l
@@ -1114,20 +1066,6 @@ func (p *FavoriteVideoResp) FastRead(buf []byte) (int, error) {
 		case 3:
 			if fieldTypeId == thrift.LIST {
 				l, err = p.FastReadField3(buf[offset:])
-				offset += l
-				if err != nil {
-					goto ReadFieldError
-				}
-			} else {
-				l, err = bthrift.Binary.Skip(buf[offset:], fieldTypeId)
-				offset += l
-				if err != nil {
-					goto SkipFieldError
-				}
-			}
-		case 4:
-			if fieldTypeId == thrift.LIST {
-				l, err = p.FastReadField4(buf[offset:])
 				offset += l
 				if err != nil {
 					goto ReadFieldError
@@ -1232,36 +1170,6 @@ func (p *FavoriteVideoResp) FastReadField3(buf []byte) (int, error) {
 	return offset, nil
 }
 
-func (p *FavoriteVideoResp) FastReadField4(buf []byte) (int, error) {
-	offset := 0
-
-	_, size, l, err := bthrift.Binary.ReadListBegin(buf[offset:])
-	offset += l
-	if err != nil {
-		return offset, err
-	}
-	p.IsFavorite = make([]bool, 0, size)
-	for i := 0; i < size; i++ {
-		var _elem bool
-		if v, l, err := bthrift.Binary.ReadBool(buf[offset:]); err != nil {
-			return offset, err
-		} else {
-			offset += l
-
-			_elem = v
-
-		}
-
-		p.IsFavorite = append(p.IsFavorite, _elem)
-	}
-	if l, err := bthrift.Binary.ReadListEnd(buf[offset:]); err != nil {
-		return offset, err
-	} else {
-		offset += l
-	}
-	return offset, nil
-}
-
 // for compatibility
 func (p *FavoriteVideoResp) FastWrite(buf []byte) int {
 	return 0
@@ -1274,7 +1182,6 @@ func (p *FavoriteVideoResp) FastWriteNocopy(buf []byte, binaryWriter bthrift.Bin
 		offset += p.fastWriteField1(buf[offset:], binaryWriter)
 		offset += p.fastWriteField2(buf[offset:], binaryWriter)
 		offset += p.fastWriteField3(buf[offset:], binaryWriter)
-		offset += p.fastWriteField4(buf[offset:], binaryWriter)
 	}
 	offset += bthrift.Binary.WriteFieldStop(buf[offset:])
 	offset += bthrift.Binary.WriteStructEnd(buf[offset:])
@@ -1288,7 +1195,6 @@ func (p *FavoriteVideoResp) BLength() int {
 		l += p.field1Length()
 		l += p.field2Length()
 		l += p.field3Length()
-		l += p.field4Length()
 	}
 	l += bthrift.Binary.FieldStopLength()
 	l += bthrift.Binary.StructEndLength()
@@ -1330,23 +1236,6 @@ func (p *FavoriteVideoResp) fastWriteField3(buf []byte, binaryWriter bthrift.Bin
 	return offset
 }
 
-func (p *FavoriteVideoResp) fastWriteField4(buf []byte, binaryWriter bthrift.BinaryWriter) int {
-	offset := 0
-	offset += bthrift.Binary.WriteFieldBegin(buf[offset:], "is_favorite", thrift.LIST, 4)
-	listBeginOffset := offset
-	offset += bthrift.Binary.ListBeginLength(thrift.BOOL, 0)
-	var length int
-	for _, v := range p.IsFavorite {
-		length++
-		offset += bthrift.Binary.WriteBool(buf[offset:], v)
-
-	}
-	bthrift.Binary.WriteListBegin(buf[listBeginOffset:], thrift.BOOL, length)
-	offset += bthrift.Binary.WriteListEnd(buf[offset:])
-	offset += bthrift.Binary.WriteFieldEnd(buf[offset:])
-	return offset
-}
-
 func (p *FavoriteVideoResp) field1Length() int {
 	l := 0
 	l += bthrift.Binary.FieldBeginLength("code", thrift.I16, 1)
@@ -1371,17 +1260,6 @@ func (p *FavoriteVideoResp) field3Length() int {
 	l += bthrift.Binary.ListBeginLength(thrift.I64, len(p.VideoId))
 	var tmpV int64
 	l += bthrift.Binary.I64Length(int64(tmpV)) * len(p.VideoId)
-	l += bthrift.Binary.ListEndLength()
-	l += bthrift.Binary.FieldEndLength()
-	return l
-}
-
-func (p *FavoriteVideoResp) field4Length() int {
-	l := 0
-	l += bthrift.Binary.FieldBeginLength("is_favorite", thrift.LIST, 4)
-	l += bthrift.Binary.ListBeginLength(thrift.BOOL, len(p.IsFavorite))
-	var tmpV bool
-	l += bthrift.Binary.BoolLength(bool(tmpV)) * len(p.IsFavorite)
 	l += bthrift.Binary.ListEndLength()
 	l += bthrift.Binary.FieldEndLength()
 	return l

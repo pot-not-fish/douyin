@@ -40,7 +40,7 @@ func InitJwt() {
 				return "", jwt.ErrMissingLoginValues
 			}
 
-			userActionResp, err := kitex_client.UserActionRpc(ctx, 2, loginReq.Username, loginReq.Password)
+			userActionResp, err := kitex_client.UserActionRpc(ctx, kitex_client.LoginUser, loginReq.Username, loginReq.Password)
 			if err != nil {
 				return "", err
 			}

@@ -36,6 +36,12 @@ func IsFollowRpc(ctx context.Context, user_id int64, to_user_id_list []int64) (*
 	return respRpc, nil
 }
 
+var (
+	IncFollow int16 = 1
+
+	DecFollow int16 = 2
+)
+
 /**
  * @function
  * @description 关注、取关操作
@@ -58,17 +64,22 @@ func RelationActionRpc(ctx context.Context, action_type int16, user_id, follow_i
 	return nil
 }
 
+var (
+	FollowList int16 = 1
+
+	FollowerList int16 = 2
+)
+
 /**
  * @function
  * @description 查看关注列表、粉丝列表
  * @param action_type 操作码 1-关注列表 2-粉丝列表
  * @return
  */
-func RelationListRpc(ctx context.Context, action_type int16, user_id, owner_id int64) (*follow_rpc.RelationListResp, error) {
+func RelationListRpc(ctx context.Context, action_type int16, owner_id int64) (*follow_rpc.RelationListResp, error) {
 	respRpc, err := FollowClient.RelationList(ctx, &follow_rpc.RelationListReq{
 		ActionType: action_type,
-		UserId:     user_id,
-		OwnerId:    owner_id,
+		UserId:     owner_id,
 	})
 	if err != nil {
 		return nil, err

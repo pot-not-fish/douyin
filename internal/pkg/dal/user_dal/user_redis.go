@@ -191,21 +191,6 @@ func (u *User) RetrieveUserCache() error {
 
 /**
  * @function
- * @description 查找集合中是否存在相应的关系（开发中）
- * @param
- * @return
- */
-func RetrieveRelationCache(follower_id, follow_id int64) (bool, error) {
-	isfollow, err := dal.RedisDB.SIsMember("relation", fmt.Sprintf("%d-%d", follower_id, follow_id)).Result()
-	if err != nil {
-		return false, err
-	}
-
-	return isfollow, nil
-}
-
-/**
- * @function
  * @description 用户添加关注，缓存的用户关注数和粉丝数自增
  * @param
  * @return

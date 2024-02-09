@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-27 11:01:52
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-04 16:31:58
+ * @LastEditTime: 2024-02-08 12:17:13
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\kitex_client\favorite.go
  */
@@ -14,10 +14,16 @@ import (
 	"fmt"
 )
 
+var (
+	IncFavorite int16 = 1
+
+	DecFavorite int16 = 2
+)
+
 /**
  * @function
  * @description 点赞视频操作
- * @param action_type 操作码 1-点赞，2-取消点赞
+ * @param action_type 操作码 IncFavorite-点赞，DecFavorite-取消点赞
  * @return
  */
 func FavoriteActionRpc(ctx context.Context, action_type int16, user_id, video_id int64) error {
@@ -65,10 +71,9 @@ func IsFavoriteRpc(ctx context.Context, user_id int64, video_id_list []int64) (*
  * @param
  * @return
  */
-func FavoriteVideoRpc(ctx context.Context, user_id, owner_id int64) (*favorite_rpc.FavoriteVideoResp, error) {
+func FavoriteVideoRpc(ctx context.Context, owner_id int64) (*favorite_rpc.FavoriteVideoResp, error) {
 	respRpc, err := FavoriteClient.FavoriteVideo(ctx, &favorite_rpc.FavoriteVideoReq{
-		UserId:  user_id,
-		OwnerId: owner_id,
+		UserId: owner_id,
 	})
 	if err != nil {
 		return nil, err

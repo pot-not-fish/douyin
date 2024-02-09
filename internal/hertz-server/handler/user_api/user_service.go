@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 17:28:27
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-03 11:11:47
+ * @LastEditTime: 2024-02-08 15:44:54
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\hertz-server\handler\user_api\user_service.go
  */
@@ -34,7 +34,8 @@ func Register(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(user_api.RegisterResp)
 
-	user, err := kitex_client.UserActionRpc(ctx, 1, req.Username, req.Password)
+	// 数据库创建用户信息相应字段
+	user, err := kitex_client.UserActionRpc(ctx, kitex_client.RegisterUser, req.Username, req.Password)
 	if err != nil {
 		resp.StatusCode = 1
 		resp.StatusMsg = err.Error()

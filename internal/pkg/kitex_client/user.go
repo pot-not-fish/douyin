@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-13 19:45:41
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-04 14:07:03
+ * @LastEditTime: 2024-02-08 15:44:34
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\kitex_client\user.go
  */
@@ -35,10 +35,16 @@ func UserListRpc(ctx context.Context, userid []int64) (*user_rpc.UserListResp, e
 	return respRpc, nil
 }
 
+var (
+	RegisterUser int16 = 1
+
+	LoginUser int16 = 2
+)
+
 /**
  * @function
  * @description 注册用户、登录用户
- * @param action_type 操作码 1-注册用户 2-登录用户
+ * @param action_type 操作码 RegisterUser-注册用户 LoginUser-登录用户
  * @return
  */
 func UserActionRpc(ctx context.Context, action_type int16, username, password string) (*user_rpc.UserActionResp, error) {
@@ -58,10 +64,22 @@ func UserActionRpc(ctx context.Context, action_type int16, username, password st
 	return respRpc, nil
 }
 
+var (
+	IncUserFavorite int16 = 1
+
+	DecUserFavorite int16 = 2
+
+	IncUserWorkCount int16 = 3
+
+	IncUserFollow int16 = 4
+
+	DecUserFollow int16 = 5
+)
+
 /**
  * @function
  * @description 用户信息操作 点赞数自增 点赞数自减 关注数自增 关注数自减
- * @param action_type 操作码 1-点赞数自增 2-点赞数自减 3-作品数自增 4-关注自增 5-关注自减
+ * @param action_type 操作码 IncUserFavorite-点赞数自增 DecUserFavorite-点赞数自减 IncUserWorkCount-作品数自增 IncUserFollow-关注自增 DecUserFollow-关注自减
  * @return
  */
 func UserInfoActionRpc(ctx context.Context, action_type int16, user_id int64, to_user_id *int64) error {

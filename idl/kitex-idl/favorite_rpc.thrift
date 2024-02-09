@@ -14,7 +14,7 @@ struct FavoriteActionResp {
 
 // 查看视频是否点赞
 struct IsFavoriteReq {
-    1: i64 user_id;  // 用户id列表
+    1: i64 user_id;  // 用户id
     2: list<i64> video_id; // 视频id列表
 }
 
@@ -27,14 +27,12 @@ struct IsFavoriteResp {
 // 查看用户点赞视频
 struct FavoriteVideoReq {
     1: i64 user_id;  // 用户id
-    2: i64 owner_id; // 所访问的用户id
 }
 
 struct FavoriteVideoResp {
-    1: i16 code;               // 状态码，0-成功，其他值-失败
-    2: string msg;             // 返回状态描述
-    3: list<i64> video_id;     // 点赞的视频id列表
-    4: list<bool> is_favorite; // 用户是否点赞
+    1: i16 code;              // 状态码，0-成功，其他值-失败
+    2: string msg;            // 返回状态描述
+    3: list<i64> video_id;    // 点赞的视频id列表
 }
 
 service FavoriteService {

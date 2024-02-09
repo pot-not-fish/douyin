@@ -70,42 +70,32 @@ func IsFollow(user_id int64, follow_id int64) (bool, error) {
 	return ok, nil
 }
 
-type RelationInfo struct {
-	RelationList []int64
-	IsFollowList []bool
-}
-
 /**
  * @function
  * @description 查询关注列表
  * @param
  * @return
  */
-func RetrieveFollow(user_id, owner_id int64) (*RelationInfo, error) {
+func RetrieveFollow(user_id int64) ([]int64, error) {
 	var err error
 	if RelationDb == nil {
 		return nil, ErrNullDB
 	}
 
-	if user_id < 0 || owner_id <= 0 {
+	if user_id <= 0 {
 		return nil, ErrInvalidUserID
 	}
 
-	var relation_info_list RelationInfo
 	var relation_list []Relation
-	if err = RelationDb.Order("created_at desc").Where("follower_id = ?", owner_id).Find(&relation_list).Error; err != nil {
+	if err = RelationDb.Order("created_at desc").Where("follower_id = ?", user_id).Find(&relation_list).Error; err != nil {
 		return nil, err
 	}
 
+	var follow_id_list []int64
 	for _, v := range relation_list {
-		is_follow, err := IsFollow(user_id, v.FollowID)
-		if err != nil {
-			return nil, err
-		}
-		relation_info_list.IsFollowList = append(relation_info_list.IsFollowList, is_follow)
-		relation_info_list.RelationList = append(relation_info_list.RelationList, v.FollowID)
+		follow_id_list = append(follow_id_list, v.FollowID)
 	}
-	return &relation_info_list, nil
+	return follow_id_list, nil
 }
 
 /**
@@ -114,25 +104,24 @@ func RetrieveFollow(user_id, owner_id int64) (*RelationInfo, error) {
  * @param
  * @return
  */
-func RetrieveFollower(user_id, owner_id int64) (*RelationInfo, error) {
+func RetrieveFollower(user_id int64) ([]int64, error) {
 	var err error
 	if RelationDb == nil {
 		return nil, ErrNullDB
 	}
 
-	var relation_info_list RelationInfo
+	if user_id <= 0 {
+		return nil, ErrInvalidUserID
+	}
+
 	var relation_list []Relation
-	if err = RelationDb.Order("created_at desc").Where("follow_id = ?", owner_id).Find(&relation_list).Error; err != nil {
+	if err = RelationDb.Order("created_at desc").Where("follow_id = ?", user_id).Find(&relation_list).Error; err != nil {
 		return nil, err
 	}
 
+	var follower_id []int64
 	for _, v := range relation_list {
-		is_follow, err := IsFollow(user_id, v.FollowerID)
-		if err != nil {
-			return nil, err
-		}
-		relation_info_list.IsFollowList = append(relation_info_list.IsFollowList, is_follow)
-		relation_info_list.RelationList = append(relation_info_list.RelationList, v.FollowerID)
+		follower_id = append(follower_id, v.FollowerID)
 	}
-	return &relation_info_list, nil
+	return follower_id, nil
 }

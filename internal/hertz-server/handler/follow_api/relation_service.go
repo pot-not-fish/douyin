@@ -27,6 +27,7 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(follow_api.RelationActionResp)
 
+	// 获取用户id
 	rowUserID, ok := c.Get("user_id")
 	if !ok {
 		resp.StatusCode = 1
@@ -38,28 +39,32 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 
 	switch req.ActionType {
 	case 1:
-		if err = kitex_client.RelationActionRpc(ctx, 1, userID, req.ToUserID); err != nil {
+		// 创建关注字段
+		if err = kitex_client.RelationActionRpc(ctx, kitex_client.IncFavorite, userID, req.ToUserID); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
 
-		if err = kitex_client.UserInfoActionRpc(ctx, 4, userID, &req.ToUserID); err != nil {
+		// 用户信息自增
+		if err = kitex_client.UserInfoActionRpc(ctx, kitex_client.IncUserFollow, userID, &req.ToUserID); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
 	case 2:
-		if err = kitex_client.RelationActionRpc(ctx, 2, userID, req.ToUserID); err != nil {
+		// 删除用户关注
+		if err = kitex_client.RelationActionRpc(ctx, kitex_client.DecFollow, userID, req.ToUserID); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
 
-		if err = kitex_client.UserInfoActionRpc(ctx, 5, userID, &req.ToUserID); err != nil {
+		// 用户信息自减
+		if err = kitex_client.UserInfoActionRpc(ctx, kitex_client.DecUserFollow, userID, &req.ToUserID); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
@@ -90,27 +95,17 @@ func RelationFollow(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(follow_api.FollowListResp)
 
-	var userID int64
-	if req.Token == nil || *req.Token == "" { // nil对应不存在token字段，""对应token值为空
-		userID = 0
-	} else {
-		userID, err = mw.TokenGetUserId(req.Token)
-		if err != nil {
-			resp.StatusCode = 1
-			resp.StatusMsg = err.Error()
-			c.JSON(consts.StatusOK, resp)
-			return
-		}
-	}
-
-	relationRpc, err := kitex_client.RelationListRpc(ctx, 1, userID, req.UserID)
+	// 获取关注列表的用户id
+	relationRpc, err := kitex_client.RelationListRpc(ctx, kitex_client.FollowList, req.UserID)
 	if err != nil {
 		resp.StatusCode = 1
 		resp.StatusMsg = err.Error()
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
+	align := len(relationRpc.UserId)
 
+	// 获取用户id对应的用户信息
 	userRpc, err := kitex_client.UserListRpc(ctx, relationRpc.UserId)
 	if err != nil {
 		resp.StatusCode = 1
@@ -118,14 +113,52 @@ func RelationFollow(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
+	if align != len(userRpc.Users) {
+		resp.StatusCode = 1
+		resp.StatusMsg = "invalid align user list"
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
 
-	for i := 0; i < len(userRpc.Users); i++ {
+	var isFollow []bool
+	if req.Token == nil || *req.Token == "" { // nil对应不存在token字段，""对应token值为空
+		isFollow = make([]bool, 0, align)
+		for i := 0; i < align; i++ {
+			isFollow = append(isFollow, false)
+		}
+	} else {
+		userID, err := mw.TokenGetUserId(req.Token)
+		if err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+
+		// 获取是否关注
+		isFollowRpc, err := kitex_client.IsFollowRpc(ctx, userID, relationRpc.UserId)
+		if err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+		if align != len(isFollowRpc.IsFollow) {
+			resp.StatusCode = 1
+			resp.StatusMsg = "invalid align is follow"
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+		isFollow = isFollowRpc.IsFollow
+	}
+
+	for i := 0; i < align; i++ {
 		resp.UserList = append(resp.UserList, &user_api.User{
 			ID:              userRpc.Users[i].Id,
 			Name:            userRpc.Users[i].Name,
 			FollowCount:     userRpc.Users[i].FollowCount,
 			FollowerCount:   userRpc.Users[i].FollowerCount,
-			IsFollow:        relationRpc.IsFollow[i],
+			IsFollow:        isFollow[i],
 			Avatar:          userRpc.Users[i].Avatar,
 			BackgroundImage: userRpc.Users[i].Background,
 			Signature:       userRpc.Users[i].Signature,
@@ -153,27 +186,17 @@ func RelationFollower(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(follow_api.FollowerListResp)
 
-	var userID int64
-	if req.Token == nil || *req.Token == "" { // nil对应不存在token字段，""对应token值为空
-		userID = 0
-	} else {
-		userID, err = mw.TokenGetUserId(req.Token)
-		if err != nil {
-			resp.StatusCode = 1
-			resp.StatusMsg = err.Error()
-			c.JSON(consts.StatusOK, resp)
-			return
-		}
-	}
-
-	relationRpc, err := kitex_client.RelationListRpc(ctx, 2, userID, req.UserID)
+	// 获取粉丝列表用户id
+	relationRpc, err := kitex_client.RelationListRpc(ctx, kitex_client.FollowerList, req.UserID)
 	if err != nil {
 		resp.StatusCode = 1
 		resp.StatusMsg = err.Error()
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
+	align := len(relationRpc.UserId)
 
+	// 通过id获取粉丝列表用户信息
 	userRpc, err := kitex_client.UserListRpc(ctx, relationRpc.UserId)
 	if err != nil {
 		resp.StatusCode = 1
@@ -181,14 +204,52 @@ func RelationFollower(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
+	if align != len(userRpc.Users) {
+		resp.StatusCode = 1
+		resp.StatusMsg = "invalid align user list"
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
 
-	for i := 0; i < len(userRpc.Users); i++ {
+	var isFollow []bool
+	if req.Token == nil || *req.Token == "" { // nil对应不存在token字段，""对应token值为空
+		isFollow = make([]bool, 0, align)
+		for i := 0; i < align; i++ {
+			isFollow = append(isFollow, false)
+		}
+	} else {
+		userID, err := mw.TokenGetUserId(req.Token)
+		if err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+
+		// 查看是否关注
+		isFollowRpc, err := kitex_client.IsFollowRpc(ctx, userID, relationRpc.UserId)
+		if err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+		if align != len(isFollowRpc.IsFollow) {
+			resp.StatusCode = 1
+			resp.StatusMsg = "invalid align is follow"
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+		isFollow = isFollowRpc.IsFollow
+	}
+
+	for i := 0; i < align; i++ {
 		resp.UserList = append(resp.UserList, &user_api.User{
 			ID:              userRpc.Users[i].Id,
 			Name:            userRpc.Users[i].Name,
 			FollowCount:     userRpc.Users[i].FollowCount,
 			FollowerCount:   userRpc.Users[i].FollowerCount,
-			IsFollow:        relationRpc.IsFollow[i],
+			IsFollow:        isFollow[i],
 			Avatar:          userRpc.Users[i].Avatar,
 			BackgroundImage: userRpc.Users[i].Background,
 			Signature:       userRpc.Users[i].Signature,

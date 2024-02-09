@@ -1,3 +1,11 @@
+/*
+ * @Author: LIKE_A_STAR
+ * @Date: 2023-12-27 10:39:56
+ * @LastEditors: LIKE_A_STAR
+ * @LastEditTime: 2024-02-08 10:19:24
+ * @Description:
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\favorite_handler\handler.go
+ */
 package favorite_handler
 
 import (
@@ -59,5 +67,15 @@ func (f *FavoriteServiceImpl) IsFavorite(ctx context.Context, request *favorite_
 func (f *FavoriteServiceImpl) FavoriteVideo(ctx context.Context, request *favorite_rpc.FavoriteVideoReq) (*favorite_rpc.FavoriteVideoResp, error) {
 	resp := new(favorite_rpc.FavoriteVideoResp)
 
+	favoriteVideos, err := favorite_dal.RetrieveFavorite(request.UserId)
+	if err != nil {
+		resp.Code = 1
+		resp.Msg = err.Error()
+		return resp, nil
+	}
+
+	resp.VideoId = favoriteVideos
+	resp.Code = 0
+	resp.Msg = "ok"
 	return resp, nil
 }

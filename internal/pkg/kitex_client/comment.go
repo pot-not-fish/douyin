@@ -14,10 +14,16 @@ import (
 	"fmt"
 )
 
+var (
+	PubComment int16 = 1
+
+	DelComment int16 = 2
+)
+
 /**
  * @function
  * @description 发布评论操作
- * @param action_type 操作码 1-评论，2-删除评论
+ * @param action_type 操作码 PubComment-评论，DelComment-删除评论
  * @return
  */
 func CommentActionRpc(ctx context.Context, action_type int16, user_id, video_id int64, content *string) (*comment_rpc.CommentActionResp, error) {

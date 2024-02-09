@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-02-02 13:46:12
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-04 14:04:54
+ * @LastEditTime: 2024-02-08 15:06:26
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\kitex_client\video.go
  */
@@ -101,10 +101,20 @@ func VideoActionRpc(ctx context.Context, user_id int64, title, cover_url, play_u
 	return nil
 }
 
+var (
+	IncVideoComment int16 = 1
+
+	DecVideoComment int16 = 2
+
+	IncVideoFavorite int16 = 3
+
+	DecVideoFavorite int16 = 4
+)
+
 /**
  * @function
  * @description 评论自增、自减，点赞自增、自减操作
- * @param action_type 操作码 1-自增评论 2-自减评论 3-自增点赞量 4-自减点赞量
+ * @param action_type 操作码 IncVideoComment-自增评论 DecVideoComment-自减评论 IncVideoFavorite-自增点赞量 DecVideoFavorite-自减点赞量
  * @return
  */
 func VideoInfoActionRpc(ctx context.Context, action_type int16, video_id int64) error {

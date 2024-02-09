@@ -1,3 +1,11 @@
+/*
+ * @Author: LIKE_A_STAR
+ * @Date: 2024-01-26 17:28:46
+ * @LastEditors: LIKE_A_STAR
+ * @LastEditTime: 2024-02-06 14:19:00
+ * @Description:
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\comment_dal\comment_mysql.go
+ */
 package comment_dal
 
 import (
@@ -86,7 +94,7 @@ func RetrieveComment(video_id int64) ([]Comment, error) {
 	}
 
 	comments := make([]Comment, 0, 20)
-	if err = CommentDb.Order("created_at desc").Where("video_id = ?", video_id).Error; err != nil {
+	if err = CommentDb.Order("created_at desc").Where("video_id = ?", video_id).Find(&comments).Error; err != nil {
 		return nil, err
 	}
 

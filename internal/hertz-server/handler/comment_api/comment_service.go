@@ -27,6 +27,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(comment_api.CommentActionResp)
 
+	// 获取用户的id
 	rowUserID, ok := c.Get("user_id")
 	if !ok {
 		resp.StatusCode = 1
@@ -37,7 +38,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 	userID := rowUserID.(int64)
 
 	switch req.ActionType {
-	case 1:
+	case 1: // 发布评论
 		if req.CommentText == nil || *req.CommentText == "" {
 			resp.StatusCode = 1
 			resp.StatusMsg = "could not send empty comment"
@@ -45,7 +46,8 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
-		commentActionRpc, err := kitex_client.CommentActionRpc(ctx, 1, userID, req.VideoID, req.CommentText)
+		// 数据库添加评论记录
+		commentActionRpc, err := kitex_client.CommentActionRpc(ctx, kitex_client.PubComment, userID, req.VideoID, req.CommentText)
 		if err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
@@ -53,6 +55,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
+		// 查看评论用户的信息
 		userListRpc, err := kitex_client.UserListRpc(ctx, []int64{userID})
 		if err != nil {
 			resp.StatusCode = 1
@@ -89,7 +92,8 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
-		if _, err = kitex_client.CommentActionRpc(ctx, 2, userID, req.VideoID, nil); err != nil {
+		// 在数据库删除评论记录
+		if _, err = kitex_client.CommentActionRpc(ctx, kitex_client.DelComment, userID, req.VideoID, nil); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = "empty comment id"
 			c.JSON(consts.StatusOK, resp)
@@ -118,6 +122,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(comment_api.CommentListResp)
 
+	// 获取视频的评论列表
 	commentListRpc, err := kitex_client.CommentListRpc(ctx, req.VideoID)
 	if err != nil {
 		resp.StatusCode = 1
@@ -125,12 +130,13 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
+	align := len(commentListRpc.Comment)
 
+	// 获取评论列表对应的用户信息
 	userIDList := make([]int64, 0, len(commentListRpc.Comment))
 	for _, v := range commentListRpc.Comment {
 		userIDList = append(userIDList, v.UserId)
 	}
-
 	userListRpc, err := kitex_client.UserListRpc(ctx, userIDList)
 	if err != nil {
 		resp.StatusCode = 1
@@ -138,29 +144,45 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
+	if align != len(userListRpc.Users) {
+		resp.StatusCode = 1
+		resp.StatusMsg = "invalid align user list"
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
 
-	var userID int64
+	// 查看评论列表的用户是否被关注
+	var isFollowList []bool
 	if req.Token == nil || *req.Token == "" { // nil对应不存在token字段，""对应token值为空
-		userID = 0
+		isFollowList = make([]bool, 0, align)
+		for i := 0; i < align; i++ {
+			isFollowList = append(isFollowList, false)
+		}
 	} else {
-		userID, err = mw.TokenGetUserId(req.Token)
+		userID, err := mw.TokenGetUserId(req.Token)
 		if err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
+		isFollowRpc, err := kitex_client.IsFollowRpc(ctx, userID, userIDList)
+		if err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+		if align != len(isFollowRpc.IsFollow) {
+			resp.StatusCode = 1
+			resp.StatusMsg = "invalid align user list"
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+		isFollowList = isFollowRpc.IsFollow
 	}
 
-	isFollowRpc, err := kitex_client.IsFollowRpc(ctx, userID, userIDList)
-	if err != nil {
-		resp.StatusCode = 1
-		resp.StatusMsg = err.Error()
-		c.JSON(consts.StatusOK, resp)
-		return
-	}
-
-	for i := 0; i < len(commentListRpc.Comment); i++ {
+	for i := 0; i < align; i++ {
 		resp.CommentList = append(resp.CommentList, &comment_api.Comment{
 			ID: commentListRpc.Comment[i].Id,
 			User: &user_api.User{
@@ -168,7 +190,7 @@ func CommentList(ctx context.Context, c *app.RequestContext) {
 				Name:            userListRpc.Users[i].Name,
 				FollowCount:     userListRpc.Users[i].FollowCount,
 				FollowerCount:   userListRpc.Users[i].FollowerCount,
-				IsFollow:        isFollowRpc.IsFollow[i],
+				IsFollow:        isFollowList[i],
 				Avatar:          userListRpc.Users[i].Avatar,
 				BackgroundImage: userListRpc.Users[i].Background,
 				Signature:       userListRpc.Users[i].Signature,
