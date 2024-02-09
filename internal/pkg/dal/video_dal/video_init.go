@@ -9,6 +9,7 @@
 package video_dal
 
 import (
+	"douyin/internal/pkg/parse"
 	"fmt"
 
 	"gorm.io/driver/mysql"
@@ -39,10 +40,10 @@ type Video struct {
 func Init() {
 	var err error
 
-	username := "root" // 使用者名字 如root
-	password := "123456"
-	host := "127.0.0.1"
-	port := 3306
+	username := parse.ConfigStructure.Mysql.Username // 使用者名字 如root
+	password := parse.ConfigStructure.Mysql.Password
+	host := parse.ConfigStructure.Mysql.Host
+	port := parse.ConfigStructure.Mysql.Port
 	dbname := "video" // 数据库名字
 
 	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", username, password, host, port, dbname)

@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 17:28:27
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-21 22:03:35
+ * @LastEditTime: 2024-02-09 20:02:44
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\cmd\hertz-cmd\main.go
  */
@@ -11,21 +11,17 @@
 package main
 
 import (
-	"douyin/internal/pkg/dal"
-	"douyin/internal/pkg/dal/user_dal"
-	"douyin/internal/pkg/dal/video_dal"
 	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/mw"
+	"douyin/internal/pkg/parse"
 
 	"github.com/cloudwego/hertz/pkg/app/server"
 	"github.com/hertz-contrib/gzip"
 )
 
 func main() {
+	parse.Init()
 	mw.InitJwt()
-	user_dal.Init()
-	dal.InitRedis()
-	video_dal.Init()
 	kitex_client.Init()
 
 	h := server.Default(

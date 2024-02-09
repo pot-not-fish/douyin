@@ -14,6 +14,7 @@ import (
 	video_api "douyin/internal/hertz-server/model/video_api"
 	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/mw"
+	"douyin/internal/pkg/parse"
 
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
@@ -342,16 +343,16 @@ func Publish(ctx context.Context, c *app.RequestContext) {
  * @return
  */
 func Uploadfile(ctx context.Context, dataFile *multipart.FileHeader, playurl string, coverurl string) error {
-	u, _ := url.Parse("https://840231514-1320167793.cos.ap-nanjing.myqcloud.com")
+	u, _ := url.Parse(parse.ConfigStructure.Cos.BucketURL)
 
-	su, _ := url.Parse("https://cos.COS_REGION.myqcloud.com")
+	su, _ := url.Parse(parse.ConfigStructure.Cos.ServiceURL)
 
 	b := &cos.BaseURL{BucketURL: u, ServiceURL: su}
 
 	client := cos.NewClient(b, &http.Client{
 		Transport: &cos.AuthorizationTransport{
-			SecretID:  "",
-			SecretKey: "",
+			SecretID:  parse.ConfigStructure.Cos.SecretID,
+			SecretKey: parse.ConfigStructure.Cos.SecretKey,
 		},
 	})
 

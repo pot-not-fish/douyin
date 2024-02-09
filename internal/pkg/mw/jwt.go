@@ -82,7 +82,7 @@ func InitJwt() {
 			user_id, ok := row_user_id.(uint)
 			if !ok {
 				status_code = 1
-				status_msg = "user_id not uint"
+				status_msg = "user id not uint"
 			}
 
 			status_msg = "Welcome"

@@ -1,6 +1,10 @@
 package dal
 
-import "github.com/go-redis/redis"
+import (
+	"douyin/internal/pkg/parse"
+
+	"github.com/go-redis/redis"
+)
 
 var (
 	RedisDB *redis.Client
@@ -15,8 +19,8 @@ var (
 func InitRedis() {
 	var err error
 	RedisDB = redis.NewClient(&redis.Options{
-		Addr:     "127.0.0.1:6379",
-		Password: "123456",
+		Addr:     parse.ConfigStructure.Redis.Address,
+		Password: parse.ConfigStructure.Redis.Password,
 		DB:       0,
 	})
 
