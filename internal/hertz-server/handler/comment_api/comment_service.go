@@ -64,6 +64,15 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
+		// 视频评论数自增
+		err = kitex_client.VideoInfoActionRpc(ctx, kitex_client.IncVideoComment, req.VideoID)
+		if err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+
 		resp.Comment = &comment_api.Comment{
 			ID: commentActionRpc.Comment.Id,
 			User: &user_api.User{
@@ -96,6 +105,15 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 		if _, err = kitex_client.CommentActionRpc(ctx, kitex_client.DelComment, userID, req.VideoID, nil); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = "empty comment id"
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
+
+		// 视频评论数自减
+		err = kitex_client.VideoInfoActionRpc(ctx, kitex_client.DecVideoComment, req.VideoID)
+		if err != nil {
+			resp.StatusCode = 1
+			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}

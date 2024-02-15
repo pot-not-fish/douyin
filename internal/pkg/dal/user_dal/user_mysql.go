@@ -2,9 +2,9 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 19:40:46
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-31 22:54:32
+ * @LastEditTime: 2024-02-15 18:30:09
  * @Description:
- * @FilePath: \undefinedd:\vscode\goWorker\src\douyin\internal\pkg\dal\user_dal\user_mysql.go
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\user_dal\user_mysql.go
  */
 package user_dal
 
@@ -136,15 +136,15 @@ func (user *User) RetrieveUser() error {
 		return ErrUserIdEmpty
 	}
 
-	err = user.RetrieveUserCache()
-	if err == nil {
+	if err = user.RetrieveUserCache(); err == nil {
 		return nil
 	}
 
-	err = user.UpdateUserCache()
-	if err != nil {
+	if err = UserDb.Where("id = ?", user.ID).First(&user).Error; err != nil {
 		return err
 	}
+
+	go UpdateUserCache(int64(user.ID))
 
 	return nil
 }
@@ -155,19 +155,19 @@ func (user *User) RetrieveUser() error {
  * @param
  * @return
  */
-func (user *User) UpdateUserCache() error {
+func UpdateUserCache(user_id int64) error {
 	var err error
 
 	if UserDb == nil {
 		return ErrNullUserDb
 	}
 
-	if user.ID == 0 {
+	if user_id == 0 {
 		return ErrUserIdEmpty
 	}
 
-	err = UserDb.Where("id = ?", user.ID).First(user).Error
-	if err != nil {
+	user := User{Model: gorm.Model{ID: uint(user_id)}}
+	if err = UserDb.Where("id = ?", user_id).First(&user).Error; err != nil {
 		return err
 	}
 
@@ -187,9 +187,18 @@ func RetreiveUsers(userid_list []int64) ([]User, error) {
 		return nil, ErrNullUserDb
 	}
 
-	var users = make([]User, 0, len(userid_list))
-	if err := UserDb.Where("id IN ?", userid_list).Find(&users).Error; err != nil { // 这里要使用切片的指针，不然会出现问题
-		return nil, err
+	var users = make([]User, len(userid_list))
+	for k, v := range userid_list {
+		users[k].ID = uint(v)
+		if err := users[k].RetrieveUserCache(); err == nil {
+			continue
+		}
+
+		if err := UserDb.Where("id = ?", v).First(&users[k]).Error; err != nil {
+			return nil, err
+		}
+
+		go UpdateUserCache(v)
 	}
 
 	return users, nil
@@ -267,10 +276,7 @@ func IncWorkCount(user_id int64) error {
 		return err
 	}
 
-	go func() {
-		user := User{Model: gorm.Model{ID: uint(user_id)}}
-		user.UpdateUserCache()
-	}()
+	go UpdateUserCache(user_id)
 
 	return nil
 }
@@ -311,12 +317,8 @@ func IncFavorite(user_id, favorite_id int64) error {
 		return err
 	}
 
-	go func() {
-		var user = User{Model: gorm.Model{ID: uint(user_id)}}
-		var video_user = User{Model: gorm.Model{ID: uint(favorite_id)}}
-		user.UpdateUserCache()
-		video_user.UpdateUserCache()
-	}()
+	go UpdateUserCache(user_id)
+	go UpdateUserCache(favorite_id)
 
 	return nil
 }
@@ -360,12 +362,8 @@ func DecFavorite(user_id, favorite_id int64) error {
 		return err
 	}
 
-	go func() {
-		var user = User{Model: gorm.Model{ID: uint(user_id)}}
-		var video_user = User{Model: gorm.Model{ID: uint(favorite_id)}}
-		user.UpdateUserCache()
-		video_user.UpdateUserCache()
-	}()
+	go UpdateUserCache(user_id)
+	go UpdateUserCache(favorite_id)
 
 	return nil
 }
@@ -396,18 +394,16 @@ func IncRelation(user_id, follow_id int64) error {
 
 	if err = IncRelationCache(user_id, follow_id); err == nil {
 		go inc_relation(user_id, follow_id)
+		return nil
 	}
 
+	// 如果缓存更新失败，则尝试更新数据库，再同步缓存
 	if err = inc_relation(user_id, follow_id); err != nil {
 		return err
 	}
 
-	go func() {
-		user := User{Model: gorm.Model{ID: uint(user_id)}}
-		to_user := User{Model: gorm.Model{ID: uint(follow_id)}}
-		user.UpdateUserCache()
-		to_user.UpdateUserCache()
-	}()
+	go UpdateUserCache(user_id)
+	go UpdateUserCache(follow_id)
 
 	return nil
 }
@@ -438,18 +434,15 @@ func DecRelation(user_id, follow_id int64) error {
 
 	if err = DecRelationCache(user_id, follow_id); err == nil {
 		go dec_relation(user_id, follow_id)
+		return nil
 	}
 
 	if err = dec_relation(user_id, follow_id); err != nil {
 		return err
 	}
 
-	go func() {
-		user := User{Model: gorm.Model{ID: uint(user_id)}}
-		to_user := User{Model: gorm.Model{ID: uint(follow_id)}}
-		user.UpdateUserCache()
-		to_user.UpdateUserCache()
-	}()
+	go UpdateUserCache(user_id)
+	go UpdateUserCache(follow_id)
 
 	return nil
 }

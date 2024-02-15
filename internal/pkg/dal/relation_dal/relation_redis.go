@@ -1,3 +1,11 @@
+/*
+ * @Author: LIKE_A_STAR
+ * @Date: 2024-01-26 17:40:38
+ * @LastEditors: LIKE_A_STAR
+ * @LastEditTime: 2024-02-13 16:36:42
+ * @Description:
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\relation_dal\relation_redis.go
+ */
 package relation_dal
 
 import (
@@ -68,60 +76,4 @@ func IsFollow(user_id int64, follow_id int64) (bool, error) {
 	}
 
 	return ok, nil
-}
-
-/**
- * @function
- * @description 查询关注列表
- * @param
- * @return
- */
-func RetrieveFollow(user_id int64) ([]int64, error) {
-	var err error
-	if RelationDb == nil {
-		return nil, ErrNullDB
-	}
-
-	if user_id <= 0 {
-		return nil, ErrInvalidUserID
-	}
-
-	var relation_list []Relation
-	if err = RelationDb.Order("created_at desc").Where("follower_id = ?", user_id).Find(&relation_list).Error; err != nil {
-		return nil, err
-	}
-
-	var follow_id_list []int64
-	for _, v := range relation_list {
-		follow_id_list = append(follow_id_list, v.FollowID)
-	}
-	return follow_id_list, nil
-}
-
-/**
- * @function
- * @description 查询粉丝列表
- * @param
- * @return
- */
-func RetrieveFollower(user_id int64) ([]int64, error) {
-	var err error
-	if RelationDb == nil {
-		return nil, ErrNullDB
-	}
-
-	if user_id <= 0 {
-		return nil, ErrInvalidUserID
-	}
-
-	var relation_list []Relation
-	if err = RelationDb.Order("created_at desc").Where("follow_id = ?", user_id).Find(&relation_list).Error; err != nil {
-		return nil, err
-	}
-
-	var follower_id []int64
-	for _, v := range relation_list {
-		follower_id = append(follower_id, v.FollowerID)
-	}
-	return follower_id, nil
 }

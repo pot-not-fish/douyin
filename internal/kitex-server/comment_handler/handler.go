@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-01-30 11:28:46
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-04 16:15:23
+ * @LastEditTime: 2024-02-14 23:08:13
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\comment_handler\handler.go
  */
@@ -66,6 +66,7 @@ func (c *CommentServiceImpl) CommentAction(ctx context.Context, request *comment
 }
 
 func (c *CommentServiceImpl) CommentList(ctx context.Context, request *comment_rpc.CommentListReq) (*comment_rpc.CommentListResp, error) {
+	var err error
 	resp := new(comment_rpc.CommentListResp)
 
 	comment_list, err := comment_dal.RetrieveComment(request.VideoId)
@@ -75,11 +76,18 @@ func (c *CommentServiceImpl) CommentList(ctx context.Context, request *comment_r
 		return resp, nil
 	}
 
+	if len(comment_list) == 0 {
+		resp.Code = 0
+		resp.Msg = "ok"
+		return resp, nil
+	}
+
 	for _, v := range comment_list {
 		resp.Comment = append(resp.Comment, &comment_rpc.Comment{
 			Id:         int64(v.ID),
 			Content:    v.Content,
 			CreateDate: fmt.Sprintf("%d-%d-%d %d:%d", v.CreatedAt.Year(), v.CreatedAt.Month(), v.CreatedAt.Day(), v.CreatedAt.Hour(), v.CreatedAt.Minute()),
+			UserId:     v.UserID,
 		})
 	}
 

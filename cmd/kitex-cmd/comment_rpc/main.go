@@ -2,7 +2,10 @@ package main
 
 import (
 	"douyin/internal/kitex-server/comment_handler"
+	"douyin/internal/pkg/dal"
+	"douyin/internal/pkg/dal/comment_dal"
 	"douyin/internal/pkg/kitex_gen/comment_rpc/commentservice"
+	"douyin/internal/pkg/parse"
 	"log"
 	"net"
 	"time"
@@ -13,6 +16,10 @@ import (
 )
 
 func main() {
+	parse.Init("../../../deployment/config/config.yaml")
+	comment_dal.Init()
+	dal.InitRedis()
+
 	r, err := etcd.NewEtcdRegistry([]string{"127.0.0.1:2379"})
 	if err != nil {
 		log.Println(err.Error())
@@ -22,7 +29,7 @@ func main() {
 	svr := commentservice.NewServer(
 		new(comment_handler.CommentServiceImpl),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{
-			ServiceName: "isfavorite",
+			ServiceName: "comment",
 		}),
 		server.WithRegistry(r),
 		server.WithServiceAddr(addr),

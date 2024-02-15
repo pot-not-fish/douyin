@@ -87,3 +87,59 @@ func (r *Relation) DeleteRelation() error {
 
 	return nil
 }
+
+/**
+ * @function
+ * @description 查询关注列表
+ * @param
+ * @return
+ */
+func RetrieveFollow(user_id int64) ([]int64, error) {
+	var err error
+	if RelationDb == nil {
+		return nil, ErrNullDB
+	}
+
+	if user_id <= 0 {
+		return nil, ErrInvalidUserID
+	}
+
+	var relation_list []Relation
+	if err = RelationDb.Order("created_at desc").Where("follower_id = ?", user_id).Find(&relation_list).Error; err != nil {
+		return nil, err
+	}
+
+	var follow_id_list []int64
+	for _, v := range relation_list {
+		follow_id_list = append(follow_id_list, v.FollowID)
+	}
+	return follow_id_list, nil
+}
+
+/**
+ * @function
+ * @description 查询粉丝列表
+ * @param
+ * @return
+ */
+func RetrieveFollower(user_id int64) ([]int64, error) {
+	var err error
+	if RelationDb == nil {
+		return nil, ErrNullDB
+	}
+
+	if user_id <= 0 {
+		return nil, ErrInvalidUserID
+	}
+
+	var relation_list []Relation
+	if err = RelationDb.Order("created_at desc").Where("follow_id = ?", user_id).Find(&relation_list).Error; err != nil {
+		return nil, err
+	}
+
+	var follower_id []int64
+	for _, v := range relation_list {
+		follower_id = append(follower_id, v.FollowerID)
+	}
+	return follower_id, nil
+}

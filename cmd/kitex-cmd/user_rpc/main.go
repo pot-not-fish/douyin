@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-13 10:36:48
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-30 14:43:59
+ * @LastEditTime: 2024-02-13 19:35:37
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\cmd\kitex-cmd\user_rpc\main.go
  */
@@ -13,6 +13,7 @@ import (
 	"douyin/internal/pkg/dal"
 	"douyin/internal/pkg/dal/user_dal"
 	"douyin/internal/pkg/kitex_gen/user_rpc/userservice"
+	"douyin/internal/pkg/parse"
 	"log"
 	"net"
 	"time"
@@ -23,6 +24,7 @@ import (
 )
 
 func main() {
+	parse.Init("../../../deployment/config/config.yaml")
 	user_dal.Init()
 	dal.InitRedis()
 
@@ -31,7 +33,7 @@ func main() {
 		log.Println(err.Error())
 	}
 
-	addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:8885")
+	addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:8884")
 	svr := userservice.NewServer(
 		new(user_handler.UserServiceImpl),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{

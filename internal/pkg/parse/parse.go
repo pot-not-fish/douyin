@@ -1,3 +1,11 @@
+/*
+ * @Author: LIKE_A_STAR
+ * @Date: 2024-02-09 16:44:23
+ * @LastEditors: LIKE_A_STAR
+ * @LastEditTime: 2024-02-13 19:11:06
+ * @Description:
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\parse\parse.go
+ */
 package parse
 
 import (
@@ -31,9 +39,9 @@ type Cos struct {
 
 var ConfigStructure *Config
 
-func Init() {
-	viper.SetConfigFile("config.yaml")
-	viper.AddConfigPath("../deployment/config")
+func Init(path string) {
+	// 根据引用config的文件位置不同，需要传入不同的路径
+	viper.SetConfigFile(path)
 
 	if err := viper.ReadInConfig(); err != nil {
 		panic(err)

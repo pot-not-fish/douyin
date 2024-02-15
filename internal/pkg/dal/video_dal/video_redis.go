@@ -257,7 +257,7 @@ func DecCommentCache(video_id int64) error {
  * @param
  * @return
  */
-func IncFavoriteCache(user_id, video_id int64) error {
+func IncFavoriteCache(video_id int64) error {
 	var err error
 
 	if err = dal.RedisDB.HIncrBy("video_favorite_count", fmt.Sprintf("%d", video_id), 1).Err(); err != nil {
@@ -273,7 +273,7 @@ func IncFavoriteCache(user_id, video_id int64) error {
  * @param
  * @return
  */
-func DecFavoriteCache(user_id, video_id int64) error {
+func DecFavoriteCache(video_id int64) error {
 	var err error
 
 	if err = dal.RedisDB.HIncrBy("video_favorite_count", fmt.Sprintf("%d", video_id), -1).Err(); err != nil {

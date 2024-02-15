@@ -71,21 +71,20 @@ func InitJwt() {
 			}
 		},
 		LoginResponse: func(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
-			var status_msg string
-			var status_code int
+			status_msg := "Welcome"
+			status_code := 0
 			row_user_id, ok := c.Get("user_id")
 			if !ok {
 				status_code = 1
 				status_msg = "user_id is empty"
 			}
 
-			user_id, ok := row_user_id.(uint)
+			user_id, ok := row_user_id.(int64)
 			if !ok {
 				status_code = 1
 				status_msg = "user id not uint"
 			}
 
-			status_msg = "Welcome"
 			c.JSON(http.StatusOK, map[string]interface{}{
 				"status_code": status_code,
 				"status_msg":  status_msg,

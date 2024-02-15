@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 17:28:27
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-09 20:02:44
+ * @LastEditTime: 2024-02-13 18:07:58
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\cmd\hertz-cmd\main.go
  */
@@ -20,12 +20,12 @@ import (
 )
 
 func main() {
-	parse.Init()
+	parse.Init("../../deployment/config/config.yaml")
 	mw.InitJwt()
 	kitex_client.Init()
 
 	h := server.Default(
-		server.WithHostPorts("0.0.0.0:8080"),
+		server.WithHostPorts("0.0.0.0:8888"),
 		server.WithMaxRequestBodySize(50*1024*1024),
 	)
 

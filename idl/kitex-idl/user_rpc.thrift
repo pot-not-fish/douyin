@@ -37,6 +37,7 @@ struct UserActionResp {
     3: User user;  // 用户信息
 }
 
+// 用户信息操作请求
 struct UserInfoActionReq {
     1: i64 user_id;             // 用户id
     2: i16 action_type;         // 操作码 1-点赞数自增 2-点赞数自减 3-作品数自增 4-关注自增 5-关注自减

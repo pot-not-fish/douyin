@@ -37,6 +37,13 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 	}
 	userID := rowUserID.(int64)
 
+	if userID == req.ToUserID {
+		resp.StatusCode = 1
+		resp.StatusMsg = "you can not follow or unfollow yourself"
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
+
 	switch req.ActionType {
 	case 1:
 		// 创建关注字段

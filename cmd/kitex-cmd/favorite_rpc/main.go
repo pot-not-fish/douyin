@@ -3,8 +3,9 @@ package main
 import (
 	"douyin/internal/kitex-server/favorite_handler"
 	"douyin/internal/pkg/dal"
-	"douyin/internal/pkg/dal/video_dal"
+	"douyin/internal/pkg/dal/favorite_dal"
 	"douyin/internal/pkg/kitex_gen/favorite_rpc/favoriteservice"
+	"douyin/internal/pkg/parse"
 	"log"
 	"net"
 	"time"
@@ -15,7 +16,8 @@ import (
 )
 
 func main() {
-	video_dal.Init()
+	parse.Init("../../../deployment/config/config.yaml")
+	favorite_dal.Init()
 	dal.InitRedis()
 
 	r, err := etcd.NewEtcdRegistry([]string{"127.0.0.1:2379"})
@@ -23,7 +25,7 @@ func main() {
 		log.Println(err.Error())
 	}
 
-	addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:8887")
+	addr, _ := net.ResolveTCPAddr("tcp", "127.0.0.1:8886")
 	svr := favoriteservice.NewServer(
 		new(favorite_handler.FavoriteServiceImpl),
 		server.WithServerBasicInfo(&rpcinfo.EndpointBasicInfo{

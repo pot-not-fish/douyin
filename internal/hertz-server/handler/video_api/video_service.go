@@ -58,7 +58,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 	// 获取视频用户信息
 	var videoUserID []int64
 	for _, v := range videoListRpc.Videos {
-		videoUserID = append(videoUserID, v.Id)
+		videoUserID = append(videoUserID, v.UserId)
 	}
 	userListRpc, err := kitex_client.UserListRpc(ctx, videoUserID)
 	if err != nil {
@@ -99,6 +99,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 			toUserIDList = append(toUserIDList, v.UserId)
 		}
 
+		// 查看视频是否点赞
 		isFavoriteRpc, err := kitex_client.IsFavoriteRpc(ctx, userID, videoIDList)
 		if err != nil {
 			resp.StatusCode = 1
@@ -108,6 +109,7 @@ func Feed(ctx context.Context, c *app.RequestContext) {
 		}
 		isFavoriteList = isFavoriteRpc.IsFavorite
 
+		// 查看用户是否关注
 		isFollowRpc, err := kitex_client.IsFollowRpc(ctx, userID, toUserIDList)
 		if err != nil {
 			resp.StatusCode = 1
@@ -171,6 +173,12 @@ func List(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 	align := len(videoListRpc.Videos)
+	if align <= 0 {
+		resp.StatusCode = 0
+		resp.StatusMsg = "ok"
+		c.JSON(consts.StatusOK, resp)
+		return
+	}
 
 	// 将id发送给kitex userinfo的rpc服务，获取用户信息
 	userListRpc, err := kitex_client.UserListRpc(ctx, []int64{req.UserID})
@@ -180,21 +188,13 @@ func List(ctx context.Context, c *app.RequestContext) {
 		c.JSON(consts.StatusOK, resp)
 		return
 	}
-	if align != len(userListRpc.Users) {
-		resp.StatusCode = 1
-		resp.StatusMsg = "invalid align user list"
-		c.JSON(consts.StatusOK, resp)
-		return
-	}
 
 	var isFavoriteList []bool
-	var isFollowList []bool
+	isFollow := false
 	if req.Token == nil || *req.Token == "" { // nil对应不存在token字段，""对应token值为空
 		isFavoriteList = make([]bool, 0, align)
-		isFollowList = make([]bool, 0, align)
 		for i := 0; i < align; i++ {
 			isFavoriteList = append(isFavoriteList, false)
-			isFollowList = append(isFollowList, false)
 		}
 	} else {
 		userID, err := mw.TokenGetUserId(req.Token)
@@ -205,10 +205,9 @@ func List(ctx context.Context, c *app.RequestContext) {
 			return
 		}
 
-		var toUserIDList = make([]int64, 0, align)
 		var videoIDList = make([]int64, 0, align)
+		toUserID := videoListRpc.Videos[0].UserId
 		for i := 0; i < align; i++ {
-			toUserIDList = append(toUserIDList, videoListRpc.Videos[i].UserId)
 			videoIDList = append(videoIDList, videoListRpc.Videos[i].Id)
 		}
 
@@ -219,33 +218,39 @@ func List(ctx context.Context, c *app.RequestContext) {
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
+		if align != len(isFavoriteRpc.IsFavorite) {
+			resp.StatusCode = 1
+			resp.StatusMsg = "invalid align isfavorite list"
+			c.JSON(consts.StatusOK, resp)
+			return
+		}
 		isFavoriteList = isFavoriteRpc.IsFavorite
 
-		isFollowRpc, err := kitex_client.IsFollowRpc(ctx, userID, toUserIDList)
+		isFollowRpc, err := kitex_client.IsFollowRpc(ctx, userID, []int64{toUserID})
 		if err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
-		isFollowList = isFollowRpc.IsFollow
+		isFollow = isFollowRpc.IsFollow[0]
 	}
 
 	for i := 0; i < align; i++ {
 		resp.VideoList = append(resp.VideoList, &video_api.Video{
 			ID: videoListRpc.Videos[i].Id,
 			Author: &user_api.User{
-				ID:              userListRpc.Users[i].Id,
-				Name:            userListRpc.Users[i].Name,
-				FollowCount:     userListRpc.Users[i].FollowCount,
-				FollowerCount:   userListRpc.Users[i].FollowerCount,
-				IsFollow:        isFollowList[i],
-				Avatar:          userListRpc.Users[i].Avatar,
-				BackgroundImage: userListRpc.Users[i].Background,
-				Signature:       userListRpc.Users[i].Signature,
-				TotalFavorited:  userListRpc.Users[i].TotalFavorited,
-				WorkCount:       userListRpc.Users[i].WorkCount,
-				FavoriteCount:   userListRpc.Users[i].FavoriteCount,
+				ID:              userListRpc.Users[0].Id,
+				Name:            userListRpc.Users[0].Name,
+				FollowCount:     userListRpc.Users[0].FollowCount,
+				FollowerCount:   userListRpc.Users[0].FollowerCount,
+				IsFollow:        isFollow,
+				Avatar:          userListRpc.Users[0].Avatar,
+				BackgroundImage: userListRpc.Users[0].Background,
+				Signature:       userListRpc.Users[0].Signature,
+				TotalFavorited:  userListRpc.Users[0].TotalFavorited,
+				WorkCount:       userListRpc.Users[0].WorkCount,
+				FavoriteCount:   userListRpc.Users[0].FavoriteCount,
 			},
 			PlayURL:       "https://840231514-1320167793.cos.ap-nanjing.myqcloud.com" + videoListRpc.Videos[i].PlayUrl,
 			CoverURL:      "https://840231514-1320167793.cos.ap-nanjing.myqcloud.com" + videoListRpc.Videos[i].CoverUrl,
@@ -307,8 +312,8 @@ func Publish(ctx context.Context, c *app.RequestContext) {
 	// 视频路径为/src/video/用户id-标题-时间戳
 	// 图片路径为/src/picture/用户id-标题-时间戳
 	timeStamp := time.Now().Unix()
-	playURL := fmt.Sprintf("/src/picture/%d-%s-%d.jpg", userID, req.Title, timeStamp)
-	coverURL := fmt.Sprintf("/src/video/%d-%s-%d.mp4", userID, req.Title, timeStamp)
+	playURL := fmt.Sprintf("/src/picture/%d-%s-%d.mp4", userID, req.Title, timeStamp)
+	coverURL := fmt.Sprintf("/src/video/%d-%s-%d.jpg", userID, req.Title, timeStamp)
 
 	if err = Uploadfile(ctx, dataFile, playURL, coverURL); err != nil {
 		resp.StatusCode = 1
@@ -324,7 +329,7 @@ func Publish(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	if err = kitex_client.UserInfoActionRpc(ctx, 3, userID, nil); err != nil {
+	if err = kitex_client.UserInfoActionRpc(ctx, kitex_client.IncUserWorkCount, userID, nil); err != nil {
 		resp.StatusCode = 1
 		resp.StatusMsg = err.Error()
 		c.JSON(consts.StatusOK, resp)
