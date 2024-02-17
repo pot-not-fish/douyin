@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-01-30 11:28:46
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-14 23:08:13
+ * @LastEditTime: 2024-02-17 18:52:07
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\comment_handler\handler.go
  */
@@ -11,6 +11,7 @@ package comment_handler
 import (
 	"context"
 	"douyin/internal/pkg/dal/comment_dal"
+	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/kitex_gen/comment_rpc"
 	"fmt"
 )
@@ -27,7 +28,7 @@ func (c *CommentServiceImpl) CommentAction(ctx context.Context, request *comment
 	}
 
 	switch request.ActionType {
-	case 1:
+	case kitex_client.PubComment:
 		if request.CommentText == nil || *request.CommentText == "" {
 			resp.Code = 1
 			resp.Msg = "Invalid comment text"
@@ -48,7 +49,7 @@ func (c *CommentServiceImpl) CommentAction(ctx context.Context, request *comment
 			CreateDate: create_date,
 			UserId:     request.UserId,
 		}
-	case 2:
+	case kitex_client.DelComment:
 		if err = comment.DeleteComment(); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()

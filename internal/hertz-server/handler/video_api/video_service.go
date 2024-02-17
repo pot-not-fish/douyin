@@ -329,7 +329,7 @@ func Publish(ctx context.Context, c *app.RequestContext) {
 		return
 	}
 
-	if err = kitex_client.UserInfoActionRpc(ctx, kitex_client.IncUserWorkCount, userID, nil); err != nil {
+	if err = kitex_client.UserInfoActionRpc(ctx, kitex_client.IncWorkCount, userID, nil); err != nil {
 		resp.StatusCode = 1
 		resp.StatusMsg = err.Error()
 		c.JSON(consts.StatusOK, resp)

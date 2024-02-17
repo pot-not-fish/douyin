@@ -1,3 +1,11 @@
+/*
+ * @Author: LIKE_A_STAR
+ * @Date: 2023-12-27 10:42:13
+ * @LastEditors: LIKE_A_STAR
+ * @LastEditTime: 2024-02-16 21:16:02
+ * @Description:
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\cmd\kitex-cmd\favorite_rpc\main.go
+ */
 package main
 
 import (

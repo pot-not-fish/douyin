@@ -4,10 +4,12 @@ package follow_api
 
 import (
 	"context"
+	"fmt"
 
 	follow_api "douyin/internal/hertz-server/model/follow_api"
 	"douyin/internal/hertz-server/model/user_api"
 	"douyin/internal/pkg/kitex_client"
+	"douyin/internal/pkg/mq"
 	"douyin/internal/pkg/mw"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -46,37 +48,53 @@ func RelationAction(ctx context.Context, c *app.RequestContext) {
 
 	switch req.ActionType {
 	case 1:
-		// 创建关注字段
-		if err = kitex_client.RelationActionRpc(ctx, kitex_client.IncFavorite, userID, req.ToUserID); err != nil {
+		message := fmt.Sprintf("%d-%d-%d", kitex_client.IncFollow, userID, req.ToUserID)
+		if err = mq.Publish("", "follow", message); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
+
+		// 创建关注字段
+		// if err = kitex_client.RelationActionRpc(ctx, kitex_client.IncFollow, userID, req.ToUserID); err != nil {
+		// 	resp.StatusCode = 1
+		// 	resp.StatusMsg = err.Error()
+		// 	c.JSON(consts.StatusOK, resp)
+		// 	return
+		// }
 
 		// 用户信息自增
-		if err = kitex_client.UserInfoActionRpc(ctx, kitex_client.IncUserFollow, userID, &req.ToUserID); err != nil {
-			resp.StatusCode = 1
-			resp.StatusMsg = err.Error()
-			c.JSON(consts.StatusOK, resp)
-			return
-		}
+		// if err = kitex_client.UserInfoActionRpc(ctx, kitex_client.IncFollow, userID, &req.ToUserID); err != nil {
+		// 	resp.StatusCode = 1
+		// 	resp.StatusMsg = err.Error()
+		// 	c.JSON(consts.StatusOK, resp)
+		// 	return
+		// }
 	case 2:
-		// 删除用户关注
-		if err = kitex_client.RelationActionRpc(ctx, kitex_client.DecFollow, userID, req.ToUserID); err != nil {
+		message := fmt.Sprintf("%d-%d-%d", kitex_client.DecFollow, userID, req.ToUserID)
+		if err = mq.Publish("", "follow", message); err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
 
+		// 删除用户关注
+		// if err = kitex_client.RelationActionRpc(ctx, kitex_client.DecFollow, userID, req.ToUserID); err != nil {
+		// 	resp.StatusCode = 1
+		// 	resp.StatusMsg = err.Error()
+		// 	c.JSON(consts.StatusOK, resp)
+		// 	return
+		// }
+
 		// 用户信息自减
-		if err = kitex_client.UserInfoActionRpc(ctx, kitex_client.DecUserFollow, userID, &req.ToUserID); err != nil {
-			resp.StatusCode = 1
-			resp.StatusMsg = err.Error()
-			c.JSON(consts.StatusOK, resp)
-			return
-		}
+		// if err = kitex_client.UserInfoActionRpc(ctx, kitex_client.DecFollow, userID, &req.ToUserID); err != nil {
+		// 	resp.StatusCode = 1
+		// 	resp.StatusMsg = err.Error()
+		// 	c.JSON(consts.StatusOK, resp)
+		// 	return
+		// }
 	default:
 		resp.StatusCode = 1
 		resp.StatusMsg = "Invalid action type"

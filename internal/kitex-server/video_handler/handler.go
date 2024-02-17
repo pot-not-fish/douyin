@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-01-30 11:46:25
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-03 23:42:40
+ * @LastEditTime: 2024-02-17 19:10:30
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\video_handler\handler.go
  */
@@ -11,6 +11,7 @@ package video_handler
 import (
 	"context"
 	"douyin/internal/pkg/dal/video_dal"
+	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/kitex_gen/video_rpc"
 )
 
@@ -120,25 +121,25 @@ func (v *VideoServoceImpl) VideoInfoAction(ctx context.Context, request *video_r
 	resp := new(video_rpc.VideoInfoActionResp)
 
 	switch request.ActionType {
-	case 1:
+	case kitex_client.PubComment:
 		if err := video_dal.IncCommentCount(request.VideoId); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
 			return resp, nil
 		}
-	case 2:
+	case kitex_client.DelComment:
 		if err := video_dal.DecCommentCount(request.VideoId); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
 			return resp, nil
 		}
-	case 3:
+	case kitex_client.IncFavorite:
 		if err := video_dal.IncFavoriteCount(request.VideoId); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
 			return resp, nil
 		}
-	case 4:
+	case kitex_client.DecFavorite:
 		if err := video_dal.DecFavoriteCount(request.VideoId); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()

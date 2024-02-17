@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-02-02 13:46:12
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-08 15:06:26
+ * @LastEditTime: 2024-02-17 19:02:14
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\kitex_client\video.go
  */
@@ -100,16 +100,6 @@ func VideoActionRpc(ctx context.Context, user_id int64, title, cover_url, play_u
 
 	return nil
 }
-
-var (
-	IncVideoComment int16 = 1
-
-	DecVideoComment int16 = 2
-
-	IncVideoFavorite int16 = 3
-
-	DecVideoFavorite int16 = 4
-)
 
 /**
  * @function

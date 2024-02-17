@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-27 10:39:56
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-08 10:19:24
+ * @LastEditTime: 2024-02-17 19:05:15
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\favorite_handler\handler.go
  */
@@ -11,6 +11,7 @@ package favorite_handler
 import (
 	"context"
 	"douyin/internal/pkg/dal/favorite_dal"
+	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/kitex_gen/favorite_rpc"
 )
 
@@ -24,14 +25,15 @@ func (f *FavoriteServiceImpl) FavoriteAction(ctx context.Context, request *favor
 		UserID:  request.UserId,
 		VideoID: request.VideoId,
 	}
+
 	switch request.ActionType {
-	case 1:
+	case kitex_client.IncFavorite:
 		if err = favorite.CreateFavorite(); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
 			return resp, nil
 		}
-	case 2:
+	case kitex_client.DecFavorite:
 		if err = favorite.CreateFavorite(); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()

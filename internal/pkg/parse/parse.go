@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-02-09 16:44:23
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-13 19:11:06
+ * @LastEditTime: 2024-02-16 12:38:44
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\parse\parse.go
  */
@@ -13,9 +13,10 @@ import (
 )
 
 type Config struct {
-	Cos   Cos
-	Redis RedisConfig
-	Mysql MysqlConfig
+	Cos      Cos
+	Redis    RedisConfig
+	Mysql    MysqlConfig
+	Rabbitmq Rabbitmq
 }
 
 type RedisConfig struct {
@@ -35,6 +36,12 @@ type Cos struct {
 	ServiceURL string
 	SecretID   string
 	SecretKey  string
+}
+
+type Rabbitmq struct {
+	Username string
+	Password string
+	Address  string
 }
 
 var ConfigStructure *Config

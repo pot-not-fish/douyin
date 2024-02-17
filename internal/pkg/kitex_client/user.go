@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-13 19:45:41
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-08 15:44:34
+ * @LastEditTime: 2024-02-17 18:59:01
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\kitex_client\user.go
  */
@@ -36,9 +36,9 @@ func UserListRpc(ctx context.Context, userid []int64) (*user_rpc.UserListResp, e
 }
 
 var (
-	RegisterUser int16 = 1
+	RegisterUser int16 = 8
 
-	LoginUser int16 = 2
+	LoginUser int16 = 9
 )
 
 /**
@@ -65,15 +65,7 @@ func UserActionRpc(ctx context.Context, action_type int16, username, password st
 }
 
 var (
-	IncUserFavorite int16 = 1
-
-	DecUserFavorite int16 = 2
-
-	IncUserWorkCount int16 = 3
-
-	IncUserFollow int16 = 4
-
-	DecUserFollow int16 = 5
+	IncWorkCount int16 = 5
 )
 
 /**

@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-27 11:01:52
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-08 12:17:13
+ * @LastEditTime: 2024-02-17 18:58:39
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\kitex_client\favorite.go
  */

@@ -15,9 +15,9 @@ import (
 )
 
 var (
-	PubComment int16 = 1
+	PubComment int16 = 8
 
-	DelComment int16 = 2
+	DelComment int16 = 9
 )
 
 /**

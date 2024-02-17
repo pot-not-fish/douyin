@@ -65,7 +65,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 		}
 
 		// 视频评论数自增
-		err = kitex_client.VideoInfoActionRpc(ctx, kitex_client.IncVideoComment, req.VideoID)
+		err = kitex_client.VideoInfoActionRpc(ctx, kitex_client.PubComment, req.VideoID)
 		if err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()
@@ -110,7 +110,7 @@ func CommentAction(ctx context.Context, c *app.RequestContext) {
 		}
 
 		// 视频评论数自减
-		err = kitex_client.VideoInfoActionRpc(ctx, kitex_client.DecVideoComment, req.VideoID)
+		err = kitex_client.VideoInfoActionRpc(ctx, kitex_client.DelComment, req.VideoID)
 		if err != nil {
 			resp.StatusCode = 1
 			resp.StatusMsg = err.Error()

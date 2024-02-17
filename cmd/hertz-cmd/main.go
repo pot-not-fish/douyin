@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 17:28:27
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-13 18:07:58
+ * @LastEditTime: 2024-02-17 22:20:47
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\cmd\hertz-cmd\main.go
  */
@@ -12,6 +12,7 @@ package main
 
 import (
 	"douyin/internal/pkg/kitex_client"
+	"douyin/internal/pkg/mq"
 	"douyin/internal/pkg/mw"
 	"douyin/internal/pkg/parse"
 
@@ -23,6 +24,9 @@ func main() {
 	parse.Init("../../deployment/config/config.yaml")
 	mw.InitJwt()
 	kitex_client.Init()
+	mq.Init()
+	mq.PublishSimple("favorite")
+	mq.PublishSimple("follow")
 
 	h := server.Default(
 		server.WithHostPorts("0.0.0.0:8888"),

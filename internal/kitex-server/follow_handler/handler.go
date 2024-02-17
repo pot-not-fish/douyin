@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-01-14 12:05:03
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-13 16:26:55
+ * @LastEditTime: 2024-02-17 19:05:48
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\follow_handler\handler.go
  */
@@ -11,6 +11,7 @@ package follow_handler
 import (
 	"context"
 	"douyin/internal/pkg/dal/relation_dal"
+	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/kitex_gen/follow_rpc"
 )
 
@@ -26,13 +27,13 @@ func (f *FollowServiceImpl) RelationAction(ctx context.Context, request *follow_
 	}
 
 	switch request.ActionType {
-	case 1:
+	case kitex_client.IncFollow:
 		if err = relation.CreateRelation(); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
 			return resp, nil
 		}
-	case 2:
+	case kitex_client.DecFollow:
 		if err = relation.DeleteRelation(); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
@@ -73,14 +74,14 @@ func (f *FollowServiceImpl) RelationList(ctx context.Context, request *follow_rp
 
 	var isFollow []int64
 	switch request.ActionType {
-	case 1:
+	case kitex_client.FollowList:
 		isFollow, err = relation_dal.RetrieveFollow(request.UserId)
 		if err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
 			return resp, nil
 		}
-	case 2:
+	case kitex_client.FollowerList:
 		isFollow, err = relation_dal.RetrieveFollower(request.UserId)
 		if err != nil {
 			resp.Code = 1

@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-13 10:37:00
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-03 23:38:09
+ * @LastEditTime: 2024-02-17 19:08:07
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\user_handler\handler.go
  */
@@ -11,6 +11,7 @@ package user_handler
 import (
 	"context"
 	"douyin/internal/pkg/dal/user_dal"
+	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/kitex_gen/user_rpc"
 )
 
@@ -57,13 +58,13 @@ func (u *UserServiceImpl) UserAction(ctx context.Context, request *user_rpc.User
 	}
 
 	switch request.ActionType {
-	case 1:
+	case kitex_client.RegisterUser:
 		if err := user.CreateUser(); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
 			return resp, nil
 		}
-	case 2:
+	case kitex_client.LoginUser:
 		if err := user.RetrieveAccount(); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
@@ -96,7 +97,7 @@ func (u *UserServiceImpl) UserInfoAction(ctx context.Context, request *user_rpc.
 	resp := new(user_rpc.UserInfoActionResp)
 
 	switch request.ActionType {
-	case 1:
+	case kitex_client.IncFavorite:
 		if request.ToUserId == nil || *request.ToUserId <= 0 {
 			resp.Code = 1
 			resp.Msg = "invalid to user id"
@@ -108,7 +109,7 @@ func (u *UserServiceImpl) UserInfoAction(ctx context.Context, request *user_rpc.
 			resp.Msg = err.Error()
 			return resp, nil
 		}
-	case 2:
+	case kitex_client.DecFavorite:
 		if request.ToUserId == nil || *request.ToUserId <= 0 {
 			resp.Code = 1
 			resp.Msg = "invalid to user id"
@@ -120,13 +121,13 @@ func (u *UserServiceImpl) UserInfoAction(ctx context.Context, request *user_rpc.
 			resp.Msg = err.Error()
 			return resp, nil
 		}
-	case 3:
+	case kitex_client.IncWorkCount:
 		if err := user_dal.IncWorkCount(request.UserId); err != nil {
 			resp.Code = 1
 			resp.Msg = err.Error()
 			return resp, nil
 		}
-	case 4:
+	case kitex_client.IncFollow:
 		if request.ToUserId == nil || *request.ToUserId <= 0 {
 			resp.Code = 1
 			resp.Msg = "invalid to user id"
@@ -138,7 +139,7 @@ func (u *UserServiceImpl) UserInfoAction(ctx context.Context, request *user_rpc.
 			resp.Msg = err.Error()
 			return resp, nil
 		}
-	case 5:
+	case kitex_client.DecFollow:
 		if request.ToUserId == nil || *request.ToUserId <= 0 {
 			resp.Code = 1
 			resp.Msg = "invalid to user id"

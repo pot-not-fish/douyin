@@ -14,6 +14,7 @@ require (
 	github.com/hertz-contrib/jwt v1.0.2
 	github.com/kitex-contrib/registry-etcd v0.2.0
 	github.com/spf13/viper v1.7.0
+	github.com/streadway/amqp v1.1.0
 	github.com/tencentyun/cos-go-sdk-v5 v0.7.45
 	gorm.io/driver/mysql v1.5.2
 	gorm.io/gorm v1.25.5
