@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-02-16 23:24:53
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-17 22:47:27
+ * @LastEditTime: 2024-02-18 10:59:22
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\cmd\mq-cmd\favorite-mq\main.go
  */
@@ -90,8 +90,6 @@ func main() {
 				fmt.Println(err.Error())
 				continue
 			}
-
-			fmt.Println(d.Body)
 		}
 	}()
 	fmt.Println("退出请按 CTRL+C\n")

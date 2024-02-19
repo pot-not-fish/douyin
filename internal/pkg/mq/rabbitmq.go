@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-02-16 12:32:02
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-17 22:32:40
+ * @LastEditTime: 2024-02-17 23:37:20
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\mq\rabbitmq.go
  */
@@ -96,79 +96,6 @@ func Publish(exchange string, queue string, message string) error {
 	})
 	if err != nil {
 		return err
-	}
-
-	return nil
-}
-
-/**
- * @method
- * @description 订阅端配置
- * @param
- * @return
- */
-func (r *Rabbitmq) SubscribeSet(exchange string) {
-	// 创建交换机
-	err := r.Channel.ExchangeDeclare(
-		exchange, // 交换机的名字
-		"fanout", // 交换机类型
-		true,     // 是否持久化
-		false,    // 是否自动删除
-		false,    // 是否内置交换机
-		false,    // 是否等待服务器确认
-		nil,      // 其他配置
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	// 创建队列
-	q, err := r.Channel.QueueDeclare(
-		"",    // 队列名称
-		false, // 是否持久化
-		false, // 是否自动删除
-		true,  // 排他（只对创建队列的连接可见）
-		false, // 是否等待服务器确认
-		nil,
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	err = r.Channel.QueueBind(
-		q.Name,   // 队列名称
-		"",       // 绑定key
-		exchange, // 交换机名称
-		true,     // 是否等待服务器确认
-		nil,
-	)
-	if err != nil {
-		panic(err)
-	}
-}
-
-/**
- * @method
- * @description 订阅消息队列
- * @param
- * @return
- */
-func (r *Rabbitmq) Subscribe(queue string) error {
-	messges, err := r.Channel.Consume(
-		queue,
-		"",
-		true,
-		false,
-		false,
-		false,
-		nil,
-	)
-	if err != nil {
-		return err
-	}
-
-	for d := range messges {
-		fmt.Println(d.Body)
 	}
 
 	return nil

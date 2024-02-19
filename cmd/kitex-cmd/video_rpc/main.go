@@ -1,3 +1,11 @@
+/*
+ * @Author: LIKE_A_STAR
+ * @Date: 2024-01-30 14:37:09
+ * @LastEditors: LIKE_A_STAR
+ * @LastEditTime: 2024-02-18 11:06:59
+ * @Description:
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\cmd\kitex-cmd\video_rpc\main.go
+ */
 package main
 
 import (
@@ -17,7 +25,9 @@ import (
 
 func main() {
 	parse.Init("../../../deployment/config/config.yaml")
+
 	video_dal.Init()
+
 	dal.InitRedis()
 
 	r, err := etcd.NewEtcdRegistry([]string{"127.0.0.1:2379"})

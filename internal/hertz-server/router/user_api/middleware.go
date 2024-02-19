@@ -3,6 +3,8 @@
 package user_api
 
 import (
+	"douyin/internal/pkg/logger/hertz_log"
+
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
@@ -13,7 +15,7 @@ func rootMw() []app.HandlerFunc {
 
 func _douyinMw() []app.HandlerFunc {
 	// your code...
-	return nil
+	return []app.HandlerFunc{hertz_log.AccessLog()}
 }
 
 func _userinfoMw() []app.HandlerFunc {

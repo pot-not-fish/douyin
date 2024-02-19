@@ -25,7 +25,9 @@ import (
 
 func main() {
 	parse.Init("../../../deployment/config/config.yaml")
+
 	user_dal.Init()
+
 	dal.InitRedis()
 
 	r, err := etcd.NewEtcdRegistry([]string{"127.0.0.1:2379"})
