@@ -38,3 +38,8 @@ douyin
 | 基础功能项说明 | 视频Feed流：支持所有用户刷抖音，视频按投稿时间倒序推出视频投稿：支持登录用户自己拍视频投稿个人主页：支持查看用户基本信息和投稿列表，注册用户流程简化 |                                                          |                                                              |
 | 方向功能项     | 喜欢列表                                                     | 用户评论                                                 | 关系列表                                                     |
 | 方向功能项说明 | 登录用户可以对视频点赞，在个人主页喜欢Tab下能够查看点赞视频列表 | 支持未登录用户查看视频下的评论列表，登录用户能够发表评论 | 登录用户可以关注其他用户，能够在个人主页查看本人的关注数和粉丝数，查看关注列表和粉丝列表 |
+
+## 架构设计
+![Pasted image 20240218181454.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1db6b709cc7a4d40b91c28bf83c2a3e5~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=993&h=408&s=31903&e=png&b=fefefe)
+## 微服务拆分
+![Pasted image 20240219112924.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/23257aca4bf543909f6486b148ff0b08~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=775&h=622&s=37040&e=png&b=fdfdfd)
