@@ -62,7 +62,8 @@ pm.test("success send", function (){
 ```
 ### 发布评论
 - 平均响应速度为83ms，50个测试用例全部通过
-- ![Pasted image 20240223121348.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/41ee8a71f47345b59c80ebd4e7b747d2~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=1422&h=887&s=169742&e=png&b=fdfdfd)
+
+  ![Pasted image 20240223121348.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/56e7ad8d0cdd40c88cf58d245ce23a50~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=1422&h=887&s=169742&e=png&b=fdfdfd)
 ### feed流
 - 平均响应速度为347ms，50个测试用例全部通过
 ![Pasted image 20240223121715.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/77bf5d8c63d24b6b9a9c6cee1d374d80~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=1407&h=890&s=163813&e=png&b=fdfdfd)
