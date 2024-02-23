@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-24 22:27:04
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-18 19:18:52
+ * @LastEditTime: 2024-02-22 17:57:56
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\hertz-server\router\video_api\middleware.go
  */
@@ -11,8 +11,6 @@
 package video_api
 
 import (
-	"douyin/internal/pkg/logger/hertz_log"
-
 	"github.com/cloudwego/hertz/pkg/app"
 )
 
@@ -23,7 +21,7 @@ func rootMw() []app.HandlerFunc {
 
 func _douyinMw() []app.HandlerFunc {
 	// your code...
-	return []app.HandlerFunc{hertz_log.AccessLog()}
+	return nil
 }
 
 func _feedMw() []app.HandlerFunc {

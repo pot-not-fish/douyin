@@ -3,7 +3,6 @@
 package follow_api
 
 import (
-	"douyin/internal/pkg/logger/hertz_log"
 	"douyin/internal/pkg/mw"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -16,7 +15,7 @@ func rootMw() []app.HandlerFunc {
 
 func _douyinMw() []app.HandlerFunc {
 	// your code...
-	return []app.HandlerFunc{hertz_log.AccessLog()}
+	return nil
 }
 
 func _relatioinMw() []app.HandlerFunc {

@@ -1,4 +1,9 @@
+## 演示视频
+
+https://www.bilibili.com/video/BV1dx421Z7qu
+
 ## 项目目录
+
 ```
 douyin
 |-- cmd
@@ -43,3 +48,17 @@ douyin
 ![Pasted image 20240218181454.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/1db6b709cc7a4d40b91c28bf83c2a3e5~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=993&h=408&s=31903&e=png&b=fefefe)
 ## 微服务拆分
 ![Pasted image 20240219112924.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/23257aca4bf543909f6486b148ff0b08~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=775&h=622&s=37040&e=png&b=fdfdfd)
+
+## 性能测试
+### 发布评论
+- 平均响应速度为83ms，50个测试用例全部通过
+![Pasted image 20240223121348.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/41ee8a71f47345b59c80ebd4e7b747d2~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=1422&h=887&s=169742&e=png&b=fdfdfd)
+### feed流
+- 平均响应速度为347ms，50个测试用例全部通过
+![Pasted image 20240223121715.png](https://p9-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/77bf5d8c63d24b6b9a9c6cee1d374d80~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=1407&h=890&s=163813&e=png&b=fdfdfd)
+### 查看视频评论
+- 平均响应速度为470ms，50个测试用例全部通过
+![Pasted image 20240223122001.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/d9300f7d25cc494692d78321d129ac5d~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=1431&h=897&s=109489&e=png&b=fefefe)
+### 查看用户信息
+- 平均响应速度为33ms，50个测试用例全部通过
+![Pasted image 20240223122258.png](https://p1-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/00da98e8dc184c41a012fd90eaef6535~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=1432&h=899&s=178223&e=png&b=fefefe)

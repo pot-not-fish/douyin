@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-13 10:37:00
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-17 19:08:07
+ * @LastEditTime: 2024-02-22 12:58:47
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\user_handler\handler.go
  */
@@ -13,6 +13,8 @@ import (
 	"douyin/internal/pkg/dal/user_dal"
 	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/kitex_gen/user_rpc"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 // UserServiceImpl implements the last service interface defined in the IDL.
@@ -21,6 +23,8 @@ type UserServiceImpl struct{}
 // Userinfo implements the UserServiceImpl interface.
 func (u *UserServiceImpl) UserList(ctx context.Context, request *user_rpc.UserListReq) (*user_rpc.UserListResp, error) {
 	resp := new(user_rpc.UserListResp)
+
+	klog.CtxDebugf(ctx, "echo called: UserList")
 
 	userInfoList, err := user_dal.RetreiveUsers(request.UserinfoId)
 	if err != nil {
@@ -51,6 +55,8 @@ func (u *UserServiceImpl) UserList(ctx context.Context, request *user_rpc.UserLi
 
 func (u *UserServiceImpl) UserAction(ctx context.Context, request *user_rpc.UserActionReq) (*user_rpc.UserActionResp, error) {
 	resp := new(user_rpc.UserActionResp)
+
+	klog.CtxDebugf(ctx, "echo called: UserAction")
 
 	user := user_dal.User{
 		Name:     request.Username,
@@ -95,6 +101,8 @@ func (u *UserServiceImpl) UserAction(ctx context.Context, request *user_rpc.User
 
 func (u *UserServiceImpl) UserInfoAction(ctx context.Context, request *user_rpc.UserInfoActionReq) (*user_rpc.UserInfoActionResp, error) {
 	resp := new(user_rpc.UserInfoActionResp)
+
+	klog.CtxDebugf(ctx, "echo called: UserInfoAction")
 
 	switch request.ActionType {
 	case kitex_client.IncFavorite:

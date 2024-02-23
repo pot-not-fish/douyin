@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-12-25 23:22:47
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2023-12-25 23:37:11
+ * @LastEditTime: 2024-02-22 17:57:08
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\hertz-server\router\favorite_api\middleware.go
  */
@@ -11,7 +11,6 @@
 package favorite_api
 
 import (
-	"douyin/internal/pkg/logger/hertz_log"
 	"douyin/internal/pkg/mw"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -24,7 +23,7 @@ func rootMw() []app.HandlerFunc {
 
 func _douyinMw() []app.HandlerFunc {
 	// your code...
-	return []app.HandlerFunc{hertz_log.AccessLog()}
+	return nil
 }
 
 func _favoriteMw() []app.HandlerFunc {

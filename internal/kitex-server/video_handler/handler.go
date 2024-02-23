@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-01-30 11:46:25
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-17 19:10:30
+ * @LastEditTime: 2024-02-22 13:00:56
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\video_handler\handler.go
  */
@@ -13,12 +13,16 @@ import (
 	"douyin/internal/pkg/dal/video_dal"
 	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/kitex_gen/video_rpc"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type VideoServoceImpl struct{}
 
 func (v *VideoServoceImpl) VideoFeed(ctx context.Context, request *video_rpc.VideoFeedReq) (*video_rpc.VideoFeedResp, error) {
 	resp := new(video_rpc.VideoFeedResp)
+
+	klog.CtxDebugf(ctx, "echo called: VideoFeed")
 
 	videoList, nextOffset, err := video_dal.VideoFeed(request.LastOffset, 10)
 	if err != nil {
@@ -47,6 +51,8 @@ func (v *VideoServoceImpl) VideoFeed(ctx context.Context, request *video_rpc.Vid
 func (v *VideoServoceImpl) VideoList(ctx context.Context, request *video_rpc.VideoListReq) (*video_rpc.VideoListResp, error) {
 	resp := new(video_rpc.VideoListResp)
 
+	klog.CtxDebugf(ctx, "echo called: VideoList")
+
 	video_list, err := video_dal.RetrieveUserVideos(request.OwnerId)
 	if err != nil {
 		resp.Code = 1
@@ -72,6 +78,8 @@ func (v *VideoServoceImpl) VideoList(ctx context.Context, request *video_rpc.Vid
 
 func (v *VideoServoceImpl) VideoInfo(ctx context.Context, request *video_rpc.VideoInfoReq) (*video_rpc.VideoListResp, error) {
 	resp := new(video_rpc.VideoListResp)
+
+	klog.CtxDebugf(ctx, "echo called: VideoInfo")
 
 	video_list, err := video_dal.RetrieveVideos(request.VideoId)
 	if err != nil {
@@ -99,6 +107,8 @@ func (v *VideoServoceImpl) VideoInfo(ctx context.Context, request *video_rpc.Vid
 func (v *VideoServoceImpl) VideoAction(ctx context.Context, request *video_rpc.VideoActionReq) (*video_rpc.VideoActionResp, error) {
 	resp := new(video_rpc.VideoActionResp)
 
+	klog.CtxDebugf(ctx, "echo called: VideoAction")
+
 	video := &video_dal.Video{
 		UserID:   request.UserId,
 		PlayUrl:  request.PlayUrl,
@@ -119,6 +129,8 @@ func (v *VideoServoceImpl) VideoAction(ctx context.Context, request *video_rpc.V
 
 func (v *VideoServoceImpl) VideoInfoAction(ctx context.Context, request *video_rpc.VideoInfoActionReq) (*video_rpc.VideoInfoActionResp, error) {
 	resp := new(video_rpc.VideoInfoActionResp)
+
+	klog.CtxDebugf(ctx, "echo called: VideoInfoAction")
 
 	switch request.ActionType {
 	case kitex_client.PubComment:

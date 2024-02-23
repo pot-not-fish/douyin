@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 17:28:27
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-18 11:06:26
+ * @LastEditTime: 2024-02-22 18:47:26
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\cmd\hertz-cmd\main.go
  */
@@ -12,7 +12,6 @@ package main
 
 import (
 	"douyin/internal/pkg/kitex_client"
-	"douyin/internal/pkg/logger/hertz_log"
 	"douyin/internal/pkg/mq"
 	"douyin/internal/pkg/mw"
 	"douyin/internal/pkg/parse"
@@ -27,8 +26,6 @@ func main() {
 	mw.InitJwt()
 
 	kitex_client.Init()
-
-	hertz_log.Init("./logger.log")
 
 	mq.Init()
 	mq.PublishSimple("favorite")

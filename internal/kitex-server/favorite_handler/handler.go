@@ -13,6 +13,8 @@ import (
 	"douyin/internal/pkg/dal/favorite_dal"
 	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/kitex_gen/favorite_rpc"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type FavoriteServiceImpl struct{}
@@ -20,6 +22,8 @@ type FavoriteServiceImpl struct{}
 func (f *FavoriteServiceImpl) FavoriteAction(ctx context.Context, request *favorite_rpc.FavoriteActionReq) (*favorite_rpc.FavoriteActionResp, error) {
 	var err error
 	resp := new(favorite_rpc.FavoriteActionResp)
+
+	klog.CtxDebugf(ctx, "echo called: FavoriteAction")
 
 	favorite := favorite_dal.Favorite{
 		UserID:  request.UserId,
@@ -53,6 +57,8 @@ func (f *FavoriteServiceImpl) FavoriteAction(ctx context.Context, request *favor
 func (f *FavoriteServiceImpl) IsFavorite(ctx context.Context, request *favorite_rpc.IsFavoriteReq) (*favorite_rpc.IsFavoriteResp, error) {
 	resp := new(favorite_rpc.IsFavoriteResp)
 
+	klog.CtxDebugf(ctx, "echo called: IsFavorite")
+
 	isFavoriteList, err := favorite_dal.IsFavorite(request.UserId, request.VideoId)
 	if err != nil {
 		resp.Code = 1
@@ -68,6 +74,8 @@ func (f *FavoriteServiceImpl) IsFavorite(ctx context.Context, request *favorite_
 
 func (f *FavoriteServiceImpl) FavoriteVideo(ctx context.Context, request *favorite_rpc.FavoriteVideoReq) (*favorite_rpc.FavoriteVideoResp, error) {
 	resp := new(favorite_rpc.FavoriteVideoResp)
+
+	klog.CtxDebugf(ctx, "echo called: FavoriteVideo")
 
 	favoriteVideos, err := favorite_dal.RetrieveFavorite(request.UserId)
 	if err != nil {

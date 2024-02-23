@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-01-14 12:05:03
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-17 19:05:48
+ * @LastEditTime: 2024-02-22 13:01:42
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\follow_handler\handler.go
  */
@@ -13,6 +13,8 @@ import (
 	"douyin/internal/pkg/dal/relation_dal"
 	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/kitex_gen/follow_rpc"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type FollowServiceImpl struct{}
@@ -20,6 +22,8 @@ type FollowServiceImpl struct{}
 func (f *FollowServiceImpl) RelationAction(ctx context.Context, request *follow_rpc.RelationActionReq) (*follow_rpc.RelationActionResp, error) {
 	var err error
 	resp := new(follow_rpc.RelationActionResp)
+
+	klog.CtxDebugf(ctx, "echo called: RelationAction")
 
 	relation := relation_dal.Relation{
 		FollowID:   request.FollowId,
@@ -53,6 +57,8 @@ func (f *FollowServiceImpl) RelationAction(ctx context.Context, request *follow_
 func (f *FollowServiceImpl) IsFollow(ctx context.Context, request *follow_rpc.IsFollowReq) (*follow_rpc.IsFollowResp, error) {
 	resp := new(follow_rpc.IsFollowResp)
 
+	klog.CtxDebugf(ctx, "echo called: IsFollow")
+
 	for _, v := range request.FollowId {
 		is_follow, err := relation_dal.IsFollow(request.UserId, v)
 		if err != nil {
@@ -71,6 +77,8 @@ func (f *FollowServiceImpl) IsFollow(ctx context.Context, request *follow_rpc.Is
 func (f *FollowServiceImpl) RelationList(ctx context.Context, request *follow_rpc.RelationListReq) (*follow_rpc.RelationListResp, error) {
 	var err error
 	resp := new(follow_rpc.RelationListResp)
+
+	klog.CtxDebugf(ctx, "echo called: RelationList")
 
 	var isFollow []int64
 	switch request.ActionType {

@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-01-30 11:28:46
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-17 18:52:07
+ * @LastEditTime: 2024-02-22 13:03:52
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\kitex-server\comment_handler\handler.go
  */
@@ -14,6 +14,8 @@ import (
 	"douyin/internal/pkg/kitex_client"
 	"douyin/internal/pkg/kitex_gen/comment_rpc"
 	"fmt"
+
+	"github.com/cloudwego/kitex/pkg/klog"
 )
 
 type CommentServiceImpl struct{}
@@ -21,6 +23,8 @@ type CommentServiceImpl struct{}
 func (c *CommentServiceImpl) CommentAction(ctx context.Context, request *comment_rpc.CommentActionReq) (*comment_rpc.CommentActionResp, error) {
 	var err error
 	resp := new(comment_rpc.CommentActionResp)
+
+	klog.CtxDebugf(ctx, "echo called: CommentAction")
 
 	comment := comment_dal.Comment{
 		UserID:  request.UserId,
@@ -69,6 +73,8 @@ func (c *CommentServiceImpl) CommentAction(ctx context.Context, request *comment
 func (c *CommentServiceImpl) CommentList(ctx context.Context, request *comment_rpc.CommentListReq) (*comment_rpc.CommentListResp, error) {
 	var err error
 	resp := new(comment_rpc.CommentListResp)
+
+	klog.CtxDebugf(ctx, "echo called: CommentList")
 
 	comment_list, err := comment_dal.RetrieveComment(request.VideoId)
 	if err != nil {
