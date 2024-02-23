@@ -50,6 +50,16 @@ douyin
 ![Pasted image 20240219112924.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/23257aca4bf543909f6486b148ff0b08~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=775&h=622&s=37040&e=png&b=fdfdfd)
 
 ## 性能测试
+
+### 测试流程
+- 每个接口在短时间内请求50次，并且时间间隔为0
+- 测试代码如下
+```javascript
+pm.test("success send", function (){
+    const responseJson = pm.response.json();
+    pm.expect(responseJson.status_code).to.eql(0);
+})
+```
 ### 发布评论
 - 平均响应速度为83ms，50个测试用例全部通过
 ![Pasted image 20240223121348.png](https://p6-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/41ee8a71f47345b59c80ebd4e7b747d2~tplv-k3u1fbpfcp-jj-mark:0:0:0:0:q75.image#?w=1422&h=887&s=169742&e=png&b=fdfdfd)
