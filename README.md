@@ -2,37 +2,24 @@
 
 https://www.bilibili.com/video/BV1dx421Z7qu
 
+## 后端地址
+
+[159.75.186.106:8888](159.75.186.106:8888)
+
+具体接口请看接口文档
+
 ## 项目目录
 
 ```
 douyin
-|-- cmd
-	|-- hertz-cmd              包含hertz启动文件
-	|-- kitex-cmd              包含kitex启动文件
-	|-- mq-cmd                 包括消息队列服务启动文件
-|-- idl
-	|-- hertz-idl              生成hertz的thrift文件
-	|-- kitex-idl              生成kitex的thrift文件
-|-- internal
-	|-- hertz-server
-		|-- handler            api网关的业务代码
-		|-- model              hertz的生成代码
-		|-- router             hertz的生成代码
-	|-- kitex-server
-		|-- handler            rpc服务业务代码
-	|-- pkg
-		|-- dal                数据库操作
-		|-- kitex_client       封装了kitex的rpc请求
-		|-- kitex_gen          kitex的生成代码
-		|-- mw                 中间件
-		|-- mq                 消息队列
-		|-- parse              解析配置文件
-		|-- logger             日志文件操作
-|-- deployment
-	|-- config                 配置文件
-|-- doc
-|-- go.mod
-|-- go.sum
+|-- hertz-server  api网关
+|-- comment-rpc   评论RPC服务
+|-- favorite-rpc  点赞RPC服务
+|-- relation-rpc  关注RPC服务
+|-- video-rpc     视频RPC服务
+|-- user-rpc      用户RPC服务
+|-- relation-mq   关注消息队列
+|-- favorite-mq   点赞消息队列
 ```
 
 ## 实现主要功能

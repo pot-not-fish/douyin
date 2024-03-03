@@ -1,0 +1,12 @@
+go 1.20
+
+use (
+	./comment-rpc
+	./favorite-mq
+	./favorite-rpc
+	./hertz-server
+	./relation-mq
+	./relation-rpc
+	./user-rpc
+	./video-rpc
+)
