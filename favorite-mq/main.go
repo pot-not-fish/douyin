@@ -19,8 +19,8 @@ import (
 )
 
 func main() {
-	// parse.Init("./local.yaml")
-	parse.Init("./config.yaml")
+	parse.Init("./local.yaml")
+	// parse.Init("./config.yaml")
 
 	mq.Init()
 

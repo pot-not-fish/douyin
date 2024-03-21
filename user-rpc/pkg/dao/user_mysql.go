@@ -6,7 +6,7 @@
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\user-rpc\pkg\dao\user_mysql.go
  */
-package user_dal
+package dao
 
 import (
 	"bytes"

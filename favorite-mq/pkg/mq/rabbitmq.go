@@ -3,6 +3,7 @@ package rabbitmq
 import (
 	"douyin/favorite-mq/pkg/parse"
 	"fmt"
+	"sync"
 
 	"github.com/streadway/amqp"
 )
@@ -12,7 +13,10 @@ type Rabbitmq struct {
 	Channel *amqp.Channel
 }
 
-var MQueue *Rabbitmq
+var (
+	MQueue *Rabbitmq
+	once   *sync.Once
+)
 
 /**
  * @function

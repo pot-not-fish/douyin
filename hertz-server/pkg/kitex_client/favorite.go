@@ -27,7 +27,7 @@ var (
  * @return
  */
 func FavoriteActionRpc(ctx context.Context, action_type int16, user_id, video_id int64) error {
-	respRpc, err := FavoriteClient.FavoriteAction(ctx, &favorite_rpc.FavoriteActionReq{
+	respRpc, err := favoriteClient.FavoriteAction(ctx, &favorite_rpc.FavoriteActionReq{
 		ActionType: action_type,
 		UserId:     user_id,
 		VideoId:    video_id,
@@ -50,7 +50,7 @@ func FavoriteActionRpc(ctx context.Context, action_type int16, user_id, video_id
  * @return
  */
 func IsFavoriteRpc(ctx context.Context, user_id int64, video_id_list []int64) (*favorite_rpc.IsFavoriteResp, error) {
-	respRpc, err := FavoriteClient.IsFavorite(ctx, &favorite_rpc.IsFavoriteReq{
+	respRpc, err := favoriteClient.IsFavorite(ctx, &favorite_rpc.IsFavoriteReq{
 		UserId:  user_id,
 		VideoId: video_id_list,
 	})
@@ -72,7 +72,7 @@ func IsFavoriteRpc(ctx context.Context, user_id int64, video_id_list []int64) (*
  * @return
  */
 func FavoriteVideoRpc(ctx context.Context, owner_id int64) (*favorite_rpc.FavoriteVideoResp, error) {
-	respRpc, err := FavoriteClient.FavoriteVideo(ctx, &favorite_rpc.FavoriteVideoReq{
+	respRpc, err := favoriteClient.FavoriteVideo(ctx, &favorite_rpc.FavoriteVideoReq{
 		UserId: owner_id,
 	})
 	if err != nil {

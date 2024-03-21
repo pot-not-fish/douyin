@@ -1,4 +1,4 @@
-package relation_dal
+package dao
 
 import (
 	"fmt"

@@ -27,7 +27,7 @@ var (
  * @return
  */
 func CommentActionRpc(ctx context.Context, action_type int16, user_id, video_id int64, content *string) (*comment_rpc.CommentActionResp, error) {
-	respRpc, err := CommentClient.CommentAction(ctx, &comment_rpc.CommentActionReq{
+	respRpc, err := commentClient.CommentAction(ctx, &comment_rpc.CommentActionReq{
 		ActionType:  action_type,
 		UserId:      user_id,
 		VideoId:     video_id,
@@ -51,7 +51,7 @@ func CommentActionRpc(ctx context.Context, action_type int16, user_id, video_id 
  * @return
  */
 func CommentListRpc(ctx context.Context, video_id int64) (*comment_rpc.CommentListResp, error) {
-	respRpc, err := CommentClient.CommentList(ctx, &comment_rpc.CommentListReq{
+	respRpc, err := commentClient.CommentList(ctx, &comment_rpc.CommentListReq{
 		VideoId: video_id,
 	})
 	if err != nil {

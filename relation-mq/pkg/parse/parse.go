@@ -8,7 +8,11 @@
  */
 package parse
 
-import "github.com/spf13/viper"
+import (
+	"sync"
+
+	"github.com/spf13/viper"
+)
 
 type Config struct {
 	Rabbitmq RabbitmqConfig
@@ -25,7 +29,10 @@ type EtcdConfig struct {
 	Host string
 }
 
-var ConfigStructure *Config
+var (
+	ConfigStructure *Config
+	once            *sync.Once
+)
 
 func Init(path string) {
 	// 根据引用config的文件位置不同，需要传入不同的路径
@@ -35,8 +42,10 @@ func Init(path string) {
 		panic(err)
 	}
 
-	ConfigStructure = new(Config)
-	if err := viper.Unmarshal(ConfigStructure); err != nil {
-		panic(err)
-	}
+	once.Do(func() {
+		ConfigStructure = new(Config)
+		if err := viper.Unmarshal(ConfigStructure); err != nil {
+			panic(err)
+		}
+	})
 }

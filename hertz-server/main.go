@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-02-28 11:13:52
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-03-02 15:10:02
+ * @LastEditTime: 2024-03-19 12:14:29
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\hertz-server\main.go
  */
@@ -11,33 +11,37 @@
 package main
 
 import (
-	"douyin/hertz-server/pkg/kitex_client"
-	"douyin/hertz-server/pkg/mq"
+	"douyin/hertz-server/pkg/hook"
 	"douyin/hertz-server/pkg/mw"
-	"douyin/hertz-server/pkg/parse"
+	"io"
+	"os"
 
 	"github.com/cloudwego/hertz/pkg/app/server"
+	"github.com/cloudwego/hertz/pkg/common/hlog"
 	"github.com/hertz-contrib/gzip"
 )
 
 func main() {
-	// parse.Init("./local.yaml")
-	parse.Init("./config.yaml")
-
-	mw.InitJwt()
-
-	kitex_client.Init()
-
-	mq.Init()
-	mq.PublishSimple("favorite")
-	mq.PublishSimple("follow")
+	f, err := os.OpenFile("./output.log", os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0644)
+	if err != nil {
+		panic(err)
+	}
+	defer f.Close()
+	fileWriter := io.MultiWriter(f, os.Stdout)
+	hlog.SetOutput(fileWriter)
 
 	h := server.Default(
 		server.WithHostPorts("0.0.0.0:8888"),
 		server.WithMaxRequestBodySize(50*1024*1024),
 	)
 
-	h.Use(gzip.Gzip(gzip.BestCompression))
+	hook.StartHook(h)
+	hook.ShutdownHook(h)
+
+	h.Use(
+		gzip.Gzip(gzip.BestCompression),
+		mw.AccessLog(),
+	)
 
 	register(h)
 	h.Spin()

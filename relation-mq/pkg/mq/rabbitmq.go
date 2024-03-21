@@ -3,6 +3,7 @@ package mq
 import (
 	"douyin/relation-mq/pkg/parse"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/streadway/amqp"
@@ -13,7 +14,11 @@ type Rabbitmq struct {
 	Channel *amqp.Channel
 }
 
-var MQueue *Rabbitmq
+var (
+	MQueue *Rabbitmq
+
+	once *sync.Once
+)
 
 /**
  * @function
@@ -28,20 +33,24 @@ func Init() {
 		panic(fmt.Errorf("config structure nullptr"))
 	}
 
-	MQueue = new(Rabbitmq)
-	username := parse.ConfigStructure.Rabbitmq.Username
-	password := parse.ConfigStructure.Rabbitmq.Password
-	address := parse.ConfigStructure.Rabbitmq.Address
-	url := fmt.Sprintf("amqp://%s:%s@%s", username, password, address)
-	MQueue.Connect, err = amqp.Dial(url)
-	if err != nil {
-		panic(err)
-	}
+	once.Do(func() {
+		var (
+			username = parse.ConfigStructure.Rabbitmq.Username
+			password = parse.ConfigStructure.Rabbitmq.Password
+			address  = parse.ConfigStructure.Rabbitmq.Address
+			url      = fmt.Sprintf("amqp://%s:%s@%s", username, password, address)
+		)
+		MQueue = new(Rabbitmq)
+		MQueue.Connect, err = amqp.Dial(url)
+		if err != nil {
+			panic(err)
+		}
 
-	MQueue.Channel, err = MQueue.Connect.Channel()
-	if err != nil {
-		panic(err)
-	}
+		MQueue.Channel, err = MQueue.Connect.Channel()
+		if err != nil {
+			panic(err)
+		}
+	})
 }
 
 /**

@@ -1,4 +1,4 @@
-package user_dal
+package dao
 
 import (
 	"fmt"

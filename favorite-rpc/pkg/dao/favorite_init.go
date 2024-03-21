@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-02-28 00:01:10
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-29 19:14:08
+ * @LastEditTime: 2024-03-12 17:23:12
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\favorite-rpc\pkg\dao\favorite_init.go
  */
@@ -11,6 +11,7 @@ package dao
 import (
 	"douyin/favorite-rpc/pkg/parse"
 	"fmt"
+	"sync"
 
 	"github.com/go-redis/redis"
 	"gorm.io/driver/mysql"
@@ -26,29 +27,32 @@ type Favorite struct {
 
 var (
 	favoriteDb *gorm.DB
+	onceMySQL  *sync.Once
 )
 
 func Init() {
-	var err error
+	var (
+		err      error
+		username = parse.ConfigStructure.Mysql.Username // 使用者名字 如root
+		password = parse.ConfigStructure.Mysql.Password
+		host     = parse.ConfigStructure.Mysql.Host
+		port     = parse.ConfigStructure.Mysql.Port
+		dbname   = "favorite" // 数据库名字
+		dsn      = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", username, password, host, port, dbname)
+	)
 
-	username := parse.ConfigStructure.Mysql.Username // 使用者名字 如root
-	password := parse.ConfigStructure.Mysql.Password
-	host := parse.ConfigStructure.Mysql.Host
-	port := parse.ConfigStructure.Mysql.Port
-	dbname := "favorite" // 数据库名字
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", username, password, host, port, dbname)
-
-	favoriteDb, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-
-	favoriteDb.AutoMigrate(&Favorite{})
+	onceMySQL.Do(func() {
+		favoriteDb, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		if err != nil {
+			panic(err)
+		}
+		favoriteDb.AutoMigrate(&Favorite{})
+	})
 }
 
 var (
-	redisDB *redis.Client
+	redisDB   *redis.Client
+	onceRedis *sync.Once
 )
 
 /**
@@ -59,10 +63,13 @@ var (
  */
 func InitRedis() {
 	var err error
-	redisDB = redis.NewClient(&redis.Options{
-		Addr:     parse.ConfigStructure.Redis.Address,
-		Password: parse.ConfigStructure.Redis.Password,
-		DB:       0,
+
+	onceRedis.Do(func() {
+		redisDB = redis.NewClient(&redis.Options{
+			Addr:     parse.ConfigStructure.Redis.Address,
+			Password: parse.ConfigStructure.Redis.Password,
+			DB:       0,
+		})
 	})
 
 	_, err = redisDB.Ping().Result()

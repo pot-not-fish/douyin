@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-03-01 17:13:01
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-03-02 15:10:13
+ * @LastEditTime: 2024-03-13 10:13:00
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\relation-mq\main.go
  */
@@ -19,8 +19,8 @@ import (
 )
 
 func main() {
-	// parse.Init("./local.yaml")
-	parse.Init("./config.yaml")
+	parse.Init("./local.yaml")
+	// parse.Init("./config.yaml")
 
 	mq.Init()
 

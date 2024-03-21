@@ -5,6 +5,7 @@ import (
 	"douyin/hertz-server/pkg/kitex_client"
 	"fmt"
 	"net/http"
+	"sync"
 	"time"
 
 	"github.com/cloudwego/hertz/pkg/app"
@@ -14,7 +15,10 @@ import (
 
 var (
 	JwtMiddleware *jwt.HertzJWTMiddleware
-	IdentityKey   = "douyin"
+
+	IdentityKey = "douyin"
+
+	once *sync.Once
 )
 
 type LoginReq struct {
@@ -30,80 +34,82 @@ type Payload struct {
 func InitJwt() {
 	var err error
 
-	JwtMiddleware, err = jwt.New(&jwt.HertzJWTMiddleware{
-		Key:         []byte("ZhaZrDBQb7MYdJWaPf5gJmGbYyVjLYgz"),
-		Timeout:     time.Hour * 24 * 7,
-		IdentityKey: IdentityKey,
-		Authenticator: func(ctx context.Context, c *app.RequestContext) (interface{}, error) {
-			var loginReq LoginReq
-			if err := c.BindAndValidate(&loginReq); err != nil {
-				return "", jwt.ErrMissingLoginValues
-			}
-
-			userActionResp, err := kitex_client.UserActionRpc(ctx, kitex_client.LoginUser, loginReq.Username, loginReq.Password)
-			if err != nil {
-				return "", err
-			}
-
-			// 后续相应会用到user_id，所以要存入上下文
-			c.Set("user_id", userActionResp.User.Id)
-
-			return &Payload{
-				Name:    loginReq.Username,
-				User_id: userActionResp.User.Id,
-			}, nil
-		},
-		PayloadFunc: func(data interface{}) jwt.MapClaims {
-			if v, ok := data.(*Payload); ok {
-				return jwt.MapClaims{
-					"name":    v.Name,
-					"user_id": v.User_id,
+	once.Do(func() {
+		JwtMiddleware, err = jwt.New(&jwt.HertzJWTMiddleware{
+			Key:         []byte("ZhaZrDBQb7MYdJWaPf5gJmGbYyVjLYgz"),
+			Timeout:     time.Hour * 24 * 7,
+			IdentityKey: IdentityKey,
+			Authenticator: func(ctx context.Context, c *app.RequestContext) (interface{}, error) {
+				var loginReq LoginReq
+				if err := c.BindAndValidate(&loginReq); err != nil {
+					return "", jwt.ErrMissingLoginValues
 				}
-			}
-			return jwt.MapClaims{}
-		},
-		IdentityHandler: func(ctx context.Context, c *app.RequestContext) interface{} {
-			claims := jwt.ExtractClaims(ctx, c)
 
-			return &Payload{
-				Name:    claims["name"].(string),
-				User_id: int64(claims["user_id"].(float64)),
-			}
-		},
-		LoginResponse: func(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
-			status_msg := "Welcome"
-			status_code := 0
-			row_user_id, ok := c.Get("user_id")
-			if !ok {
-				status_code = 1
-				status_msg = "user_id is empty"
-			}
+				userActionResp, err := kitex_client.UserActionRpc(ctx, kitex_client.LoginUser, loginReq.Username, loginReq.Password)
+				if err != nil {
+					return "", err
+				}
 
-			user_id, ok := row_user_id.(int64)
-			if !ok {
-				status_code = 1
-				status_msg = "user id not uint"
-			}
+				// 后续相应会用到user_id，所以要存入上下文
+				c.Set("user_id", userActionResp.User.Id)
 
-			c.JSON(http.StatusOK, map[string]interface{}{
-				"status_code": status_code,
-				"status_msg":  status_msg,
-				"user_id":     user_id,
-				"token":       token,
-			})
-		},
-		Unauthorized: func(ctx context.Context, c *app.RequestContext, code int, message string) {
-			c.JSON(code, map[string]interface{}{
-				"status_code": 1,
-				"status_msg":  message,
-			})
-		},
-		TokenLookup: "query: token, form: token",
+				return &Payload{
+					Name:    loginReq.Username,
+					User_id: userActionResp.User.Id,
+				}, nil
+			},
+			PayloadFunc: func(data interface{}) jwt.MapClaims {
+				if v, ok := data.(*Payload); ok {
+					return jwt.MapClaims{
+						"name":    v.Name,
+						"user_id": v.User_id,
+					}
+				}
+				return jwt.MapClaims{}
+			},
+			IdentityHandler: func(ctx context.Context, c *app.RequestContext) interface{} {
+				claims := jwt.ExtractClaims(ctx, c)
+
+				return &Payload{
+					Name:    claims["name"].(string),
+					User_id: int64(claims["user_id"].(float64)),
+				}
+			},
+			LoginResponse: func(ctx context.Context, c *app.RequestContext, code int, token string, expire time.Time) {
+				status_msg := "Welcome"
+				status_code := 0
+				row_user_id, ok := c.Get("user_id")
+				if !ok {
+					status_code = 1
+					status_msg = "user_id is empty"
+				}
+
+				user_id, ok := row_user_id.(int64)
+				if !ok {
+					status_code = 1
+					status_msg = "user id not uint"
+				}
+
+				c.JSON(http.StatusOK, map[string]interface{}{
+					"status_code": status_code,
+					"status_msg":  status_msg,
+					"user_id":     user_id,
+					"token":       token,
+				})
+			},
+			Unauthorized: func(ctx context.Context, c *app.RequestContext, code int, message string) {
+				c.JSON(code, map[string]interface{}{
+					"status_code": 1,
+					"status_msg":  message,
+				})
+			},
+			TokenLookup: "query: token, form: token",
+		})
+
+		if err != nil {
+			panic(err)
+		}
 	})
-
-	if err != nil {
-		panic(err)
-	}
 }
 
 /**

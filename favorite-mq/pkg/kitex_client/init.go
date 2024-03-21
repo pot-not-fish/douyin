@@ -13,6 +13,7 @@ import (
 	"douyin/favorite-mq/pkg/kitex_gen/user_rpc/userservice"
 	"douyin/favorite-mq/pkg/kitex_gen/video_rpc/videoservice"
 	"douyin/favorite-mq/pkg/parse"
+	"sync"
 
 	"github.com/cloudwego/kitex/client"
 	"github.com/cloudwego/kitex/pkg/discovery"
@@ -27,27 +28,32 @@ var (
 	FavoriteClient favoriteservice.Client
 
 	VideoClient videoservice.Client
+
+	once *sync.Once
 )
 
 func Init() {
 	var err error
-	etcdClient, err = etcd.NewEtcdResolver([]string{parse.ConfigStructure.Etcd.Host})
-	if err != nil {
-		panic(err)
-	}
 
-	UserinfoClient, err = userservice.NewClient("user", client.WithResolver(etcdClient))
-	if err != nil {
-		panic(err)
-	}
+	once.Do(func() {
+		etcdClient, err = etcd.NewEtcdResolver([]string{parse.ConfigStructure.Etcd.Host})
+		if err != nil {
+			panic(err)
+		}
 
-	FavoriteClient, err = favoriteservice.NewClient("favorite", client.WithResolver(etcdClient))
-	if err != nil {
-		panic(err)
-	}
+		UserinfoClient, err = userservice.NewClient("user", client.WithResolver(etcdClient))
+		if err != nil {
+			panic(err)
+		}
 
-	VideoClient, err = videoservice.NewClient("video", client.WithResolver(etcdClient))
-	if err != nil {
-		panic(err)
-	}
+		FavoriteClient, err = favoriteservice.NewClient("favorite", client.WithResolver(etcdClient))
+		if err != nil {
+			panic(err)
+		}
+
+		VideoClient, err = videoservice.NewClient("video", client.WithResolver(etcdClient))
+		if err != nil {
+			panic(err)
+		}
+	})
 }

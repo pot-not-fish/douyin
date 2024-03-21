@@ -16,9 +16,9 @@ import (
 	"github.com/cloudwego/kitex/pkg/klog"
 )
 
-type VideoServoceImpl struct{}
+type VideoServiceImpl struct{}
 
-func (v *VideoServoceImpl) VideoFeed(ctx context.Context, request *video_rpc.VideoFeedReq) (*video_rpc.VideoFeedResp, error) {
+func (v *VideoServiceImpl) VideoFeed(ctx context.Context, request *video_rpc.VideoFeedReq) (*video_rpc.VideoFeedResp, error) {
 	resp := new(video_rpc.VideoFeedResp)
 
 	videoList, nextOffset, err := dao.VideoFeed(request.LastOffset, 10)
@@ -45,7 +45,7 @@ func (v *VideoServoceImpl) VideoFeed(ctx context.Context, request *video_rpc.Vid
 	return resp, nil
 }
 
-func (v *VideoServoceImpl) VideoList(ctx context.Context, request *video_rpc.VideoListReq) (*video_rpc.VideoListResp, error) {
+func (v *VideoServiceImpl) VideoList(ctx context.Context, request *video_rpc.VideoListReq) (*video_rpc.VideoListResp, error) {
 	resp := new(video_rpc.VideoListResp)
 
 	video_list, err := dao.RetrieveUserVideos(request.OwnerId)
@@ -71,7 +71,7 @@ func (v *VideoServoceImpl) VideoList(ctx context.Context, request *video_rpc.Vid
 	return resp, nil
 }
 
-func (v *VideoServoceImpl) VideoInfo(ctx context.Context, request *video_rpc.VideoInfoReq) (*video_rpc.VideoListResp, error) {
+func (v *VideoServiceImpl) VideoInfo(ctx context.Context, request *video_rpc.VideoInfoReq) (*video_rpc.VideoListResp, error) {
 	resp := new(video_rpc.VideoListResp)
 
 	video_list, err := dao.RetrieveVideos(request.VideoId)
@@ -97,7 +97,7 @@ func (v *VideoServoceImpl) VideoInfo(ctx context.Context, request *video_rpc.Vid
 	return resp, nil
 }
 
-func (v *VideoServoceImpl) VideoAction(ctx context.Context, request *video_rpc.VideoActionReq) (*video_rpc.VideoActionResp, error) {
+func (v *VideoServiceImpl) VideoAction(ctx context.Context, request *video_rpc.VideoActionReq) (*video_rpc.VideoActionResp, error) {
 	resp := new(video_rpc.VideoActionResp)
 
 	klog.CtxDebugf(ctx, "echo called: VideoAction")
@@ -130,7 +130,7 @@ var (
 	DelComment int16 = 9
 )
 
-func (v *VideoServoceImpl) VideoInfoAction(ctx context.Context, request *video_rpc.VideoInfoActionReq) (*video_rpc.VideoInfoActionResp, error) {
+func (v *VideoServiceImpl) VideoInfoAction(ctx context.Context, request *video_rpc.VideoInfoActionReq) (*video_rpc.VideoInfoActionResp, error) {
 	resp := new(video_rpc.VideoInfoActionResp)
 
 	klog.CtxDebugf(ctx, "echo called: VideoInfoAction")

@@ -2,15 +2,16 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-10 19:25:53
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-01-27 23:18:35
+ * @LastEditTime: 2024-03-12 18:44:43
  * @Description:
- * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\dal\user_dal\user_init.go
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\user-rpc\pkg\dao\user_init.go
  */
-package user_dal
+package dao
 
 import (
 	"douyin/user-rpc/pkg/parse"
 	"fmt"
+	"sync"
 
 	"github.com/go-redis/redis"
 	"gorm.io/driver/mysql"
@@ -18,7 +19,8 @@ import (
 )
 
 var (
-	userDb *gorm.DB
+	userDb    *gorm.DB
+	onceMySQL *sync.Once
 )
 
 type User struct {
@@ -47,26 +49,28 @@ type User struct {
  * @return
  */
 func Init() {
-	var err error
+	var (
+		err      error
+		username = parse.ConfigStructure.Mysql.Username // 使用者名字 如root
+		password = parse.ConfigStructure.Mysql.Password
+		host     = parse.ConfigStructure.Mysql.Host
+		port     = parse.ConfigStructure.Mysql.Port
+		dbname   = "user" // 数据库名字
+		dsn      = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", username, password, host, port, dbname)
+	)
 
-	username := parse.ConfigStructure.Mysql.Username // 使用者名字 如root
-	password := parse.ConfigStructure.Mysql.Password
-	host := parse.ConfigStructure.Mysql.Host
-	port := parse.ConfigStructure.Mysql.Port
-	dbname := "user" // 数据库名字
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", username, password, host, port, dbname)
-
-	userDb, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-	if err != nil {
-		panic(err)
-	}
-
-	userDb.AutoMigrate(&User{})
+	onceMySQL.Do(func() {
+		userDb, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		if err != nil {
+			panic(err)
+		}
+		userDb.AutoMigrate(&User{})
+	})
 }
 
 var (
-	redisDB *redis.Client
+	redisDB   *redis.Client
+	onceRedis *sync.Once
 )
 
 /**
@@ -77,10 +81,13 @@ var (
  */
 func InitRedis() {
 	var err error
-	redisDB = redis.NewClient(&redis.Options{
-		Addr:     parse.ConfigStructure.Redis.Address,
-		Password: parse.ConfigStructure.Redis.Password,
-		DB:       0,
+
+	onceRedis.Do(func() {
+		redisDB = redis.NewClient(&redis.Options{
+			Addr:     parse.ConfigStructure.Redis.Address,
+			Password: parse.ConfigStructure.Redis.Password,
+			DB:       0,
+		})
 	})
 
 	_, err = redisDB.Ping().Result()

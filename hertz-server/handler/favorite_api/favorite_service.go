@@ -58,30 +58,6 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
-
-		// 创建相关用户点赞信息字段
-		// if err := kitex_client.FavoriteActionRpc(ctx, kitex_client.IncFavorite, userID, req.VideoID); err != nil {
-		// 	resp.StatusCode = 1
-		// 	resp.StatusMsg = err.Error()
-		// 	c.JSON(consts.StatusOK, resp)
-		// 	return
-		// }
-
-		// 用户点赞数和被点赞的用户的获赞数自增
-		// if err := kitex_client.UserInfoActionRpc(ctx, kitex_client.IncFavorite, userID, &videoList.Videos[0].UserId); err != nil {
-		// 	resp.StatusCode = 1
-		// 	resp.StatusMsg = err.Error()
-		// 	c.JSON(consts.StatusOK, resp)
-		// 	return
-		// }
-
-		// 被点赞的作品的获赞数自增
-		// if err := kitex_client.VideoInfoActionRpc(ctx, kitex_client.IncFavorite, req.VideoID); err != nil {
-		// 	resp.StatusCode = 1
-		// 	resp.StatusMsg = err.Error()
-		// 	c.JSON(consts.StatusOK, resp)
-		// 	return
-		// }
 	case 2: // 取消点赞
 		message := fmt.Sprintf("%d-%d-%d-%d", kitex_client.DecFavorite, userID, videoList.Videos[0].UserId, req.VideoID)
 		if err = mq.Publish("", "favorite", message); err != nil {
@@ -90,30 +66,6 @@ func FavoriteAction(ctx context.Context, c *app.RequestContext) {
 			c.JSON(consts.StatusOK, resp)
 			return
 		}
-
-		// 删除相关用户点赞信息字段
-		// if err := kitex_client.FavoriteActionRpc(ctx, kitex_client.DecFavorite, userID, req.VideoID); err != nil {
-		// 	resp.StatusCode = 1
-		// 	resp.StatusMsg = err.Error()
-		// 	c.JSON(consts.StatusOK, resp)
-		// 	return
-		// }
-
-		// 用户点赞数和被点赞的用户的获赞数自减
-		// if err := kitex_client.UserInfoActionRpc(ctx, kitex_client.DecFavorite, userID, &videoList.Videos[0].UserId); err != nil {
-		// 	resp.StatusCode = 1
-		// 	resp.StatusMsg = err.Error()
-		// 	c.JSON(consts.StatusOK, resp)
-		// 	return
-		// }
-
-		// 被点赞的作品的获赞数自减
-		// if err := kitex_client.VideoInfoActionRpc(ctx, kitex_client.DecFavorite, req.VideoID); err != nil {
-		// 	resp.StatusCode = 1
-		// 	resp.StatusMsg = err.Error()
-		// 	c.JSON(consts.StatusOK, resp)
-		// 	return
-		// }
 	default:
 		resp.StatusCode = 1
 		resp.StatusMsg = "Invalid action type"

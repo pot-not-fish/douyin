@@ -6,7 +6,7 @@
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\relation-rpc\pkg\dao\relation_redis.go
  */
-package relation_dal
+package dao
 
 import (
 	"fmt"

@@ -21,7 +21,7 @@ import (
  * @return
  */
 func VideoFeedRpc(ctx context.Context, last_offset int64) (*video_rpc.VideoFeedResp, error) {
-	respRpc, err := VideoClient.VideoFeed(ctx, &video_rpc.VideoFeedReq{
+	respRpc, err := videoClient.VideoFeed(ctx, &video_rpc.VideoFeedReq{
 		LastOffset: last_offset,
 	})
 	if err != nil {
@@ -42,7 +42,7 @@ func VideoFeedRpc(ctx context.Context, last_offset int64) (*video_rpc.VideoFeedR
  * @return
  */
 func VideoListRpc(ctx context.Context, owner_id int64) (*video_rpc.VideoListResp, error) {
-	respRpc, err := VideoClient.VideoList(ctx, &video_rpc.VideoListReq{
+	respRpc, err := videoClient.VideoList(ctx, &video_rpc.VideoListReq{
 		OwnerId: owner_id,
 	})
 	if err != nil {
@@ -63,7 +63,7 @@ func VideoListRpc(ctx context.Context, owner_id int64) (*video_rpc.VideoListResp
  * @return
  */
 func VideoInfoRpc(ctx context.Context, video_id []int64) (*video_rpc.VideoListResp, error) {
-	respRpc, err := VideoClient.VideoInfo(ctx, &video_rpc.VideoInfoReq{
+	respRpc, err := videoClient.VideoInfo(ctx, &video_rpc.VideoInfoReq{
 		VideoId: video_id,
 	})
 	if err != nil {
@@ -84,7 +84,7 @@ func VideoInfoRpc(ctx context.Context, video_id []int64) (*video_rpc.VideoListRe
  * @return
  */
 func VideoActionRpc(ctx context.Context, user_id int64, title, cover_url, play_url string) error {
-	respRpc, err := VideoClient.VideoAction(ctx, &video_rpc.VideoActionReq{
+	respRpc, err := videoClient.VideoAction(ctx, &video_rpc.VideoActionReq{
 		UserId:   user_id,
 		Title:    title,
 		CoverUrl: cover_url,
@@ -108,7 +108,7 @@ func VideoActionRpc(ctx context.Context, user_id int64, title, cover_url, play_u
  * @return
  */
 func VideoInfoActionRpc(ctx context.Context, action_type int16, video_id int64) error {
-	respRpc, err := VideoClient.VideoInfoAction(ctx, &video_rpc.VideoInfoActionReq{
+	respRpc, err := videoClient.VideoInfoAction(ctx, &video_rpc.VideoInfoActionReq{
 		ActionType: action_type,
 		VideoId:    video_id,
 	})

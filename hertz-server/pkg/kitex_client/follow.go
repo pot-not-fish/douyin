@@ -21,7 +21,7 @@ import (
  * @return
  */
 func IsFollowRpc(ctx context.Context, user_id int64, to_user_id_list []int64) (*follow_rpc.IsFollowResp, error) {
-	respRpc, err := FollowClient.IsFollow(ctx, &follow_rpc.IsFollowReq{
+	respRpc, err := followClient.IsFollow(ctx, &follow_rpc.IsFollowReq{
 		UserId:   user_id,
 		FollowId: to_user_id_list,
 	})
@@ -49,7 +49,7 @@ var (
  * @return
  */
 func RelationActionRpc(ctx context.Context, action_type int16, user_id, follow_id int64) error {
-	respRpc, err := FollowClient.RelationAction(ctx, &follow_rpc.RelationActionReq{
+	respRpc, err := followClient.RelationAction(ctx, &follow_rpc.RelationActionReq{
 		ActionType: action_type,
 		UserId:     user_id,
 		FollowId:   follow_id,
@@ -77,7 +77,7 @@ var (
  * @return
  */
 func RelationListRpc(ctx context.Context, action_type int16, owner_id int64) (*follow_rpc.RelationListResp, error) {
-	respRpc, err := FollowClient.RelationList(ctx, &follow_rpc.RelationListReq{
+	respRpc, err := followClient.RelationList(ctx, &follow_rpc.RelationListReq{
 		ActionType: action_type,
 		UserId:     owner_id,
 	})

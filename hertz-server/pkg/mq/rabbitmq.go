@@ -2,15 +2,16 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-02-16 12:32:02
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-02-17 23:37:20
+ * @LastEditTime: 2024-03-12 19:58:16
  * @Description:
- * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\internal\pkg\mq\rabbitmq.go
+ * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\hertz-server\pkg\mq\rabbitmq.go
  */
 package mq
 
 import (
 	"douyin/hertz-server/pkg/parse"
 	"fmt"
+	"sync"
 	"time"
 
 	"github.com/streadway/amqp"
@@ -21,7 +22,11 @@ type Rabbitmq struct {
 	Channel *amqp.Channel
 }
 
-var MQueue *Rabbitmq
+var (
+	MQueue *Rabbitmq
+
+	once *sync.Once
+)
 
 /**
  * @function
@@ -36,18 +41,28 @@ func Init() {
 		panic(fmt.Errorf("config structure nullptr"))
 	}
 
-	MQueue = new(Rabbitmq)
-	username := parse.ConfigStructure.Rabbitmq.Username
-	password := parse.ConfigStructure.Rabbitmq.Password
-	address := parse.ConfigStructure.Rabbitmq.Address
-	url := fmt.Sprintf("amqp://%s:%s@%s", username, password, address)
-	MQueue.Connect, err = amqp.Dial(url)
-	if err != nil {
-		panic(err)
-	}
+	once.Do(func() {
+		var (
+			username = parse.ConfigStructure.Rabbitmq.Username
+			password = parse.ConfigStructure.Rabbitmq.Password
+			address  = parse.ConfigStructure.Rabbitmq.Address
+			url      = fmt.Sprintf("amqp://%s:%s@%s", username, password, address)
+		)
+		MQueue = new(Rabbitmq)
+		MQueue.Connect, err = amqp.Dial(url)
+		if err != nil {
+			panic(err)
+		}
 
-	MQueue.Channel, err = MQueue.Connect.Channel()
-	if err != nil {
+		MQueue.Channel, err = MQueue.Connect.Channel()
+		if err != nil {
+			panic(err)
+		}
+	})
+}
+
+func Close() {
+	if err := MQueue.Connect.Close(); err != nil {
 		panic(err)
 	}
 }

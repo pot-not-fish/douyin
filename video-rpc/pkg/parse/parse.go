@@ -2,13 +2,17 @@
  * @Author: LIKE_A_STAR
  * @Date: 2024-03-01 00:04:46
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-03-01 00:04:56
+ * @LastEditTime: 2024-03-12 18:52:24
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\video-rpc\pkg\parse\parse.go
  */
 package parse
 
-import "github.com/spf13/viper"
+import (
+	"sync"
+
+	"github.com/spf13/viper"
+)
 
 type Config struct {
 	Redis RedisConfig
@@ -32,7 +36,10 @@ type EtcdConfig struct {
 	Host string
 }
 
-var ConfigStructure *Config
+var (
+	ConfigStructure *Config
+	once            *sync.Once
+)
 
 func Init(path string) {
 	// 根据引用config的文件位置不同，需要传入不同的路径
@@ -42,8 +49,10 @@ func Init(path string) {
 		panic(err)
 	}
 
-	ConfigStructure = new(Config)
-	if err := viper.Unmarshal(ConfigStructure); err != nil {
-		panic(err)
-	}
+	once.Do(func() {
+		ConfigStructure = new(Config)
+		if err := viper.Unmarshal(ConfigStructure); err != nil {
+			panic(err)
+		}
+	})
 }

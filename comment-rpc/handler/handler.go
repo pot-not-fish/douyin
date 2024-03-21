@@ -29,7 +29,7 @@ func (c *CommentServiceImpl) CommentAction(ctx context.Context, request *comment
 	var err error
 	resp := new(comment_rpc.CommentActionResp)
 
-	klog.CtxDebugf(ctx, "echo called: CommentAction")
+	klog.CtxDebugf(ctx, "echo called: %d", request.UserId)
 
 	comment := dao.Comment{
 		UserID:  request.UserId,

@@ -21,7 +21,7 @@ import (
  * @return
  */
 func UserListRpc(ctx context.Context, userid []int64) (*user_rpc.UserListResp, error) {
-	respRpc, err := UserinfoClient.UserList(ctx, &user_rpc.UserListReq{
+	respRpc, err := userinfoClient.UserList(ctx, &user_rpc.UserListReq{
 		UserinfoId: userid,
 	})
 	if err != nil {
@@ -48,7 +48,7 @@ var (
  * @return
  */
 func UserActionRpc(ctx context.Context, action_type int16, username, password string) (*user_rpc.UserActionResp, error) {
-	respRpc, err := UserinfoClient.UserAction(ctx, &user_rpc.UserActionReq{
+	respRpc, err := userinfoClient.UserAction(ctx, &user_rpc.UserActionReq{
 		ActionType: action_type,
 		Username:   username,
 		Password:   password,
@@ -75,7 +75,7 @@ var (
  * @return
  */
 func UserInfoActionRpc(ctx context.Context, action_type int16, user_id int64, to_user_id *int64) error {
-	respRpc, err := UserinfoClient.UserInfoAction(ctx, &user_rpc.UserInfoActionReq{
+	respRpc, err := userinfoClient.UserInfoAction(ctx, &user_rpc.UserInfoActionReq{
 		ActionType: action_type,
 		UserId:     user_id,
 		ToUserId:   to_user_id,

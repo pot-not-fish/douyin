@@ -2,7 +2,7 @@
  * @Author: LIKE_A_STAR
  * @Date: 2023-11-25 17:18:02
  * @LastEditors: LIKE_A_STAR
- * @LastEditTime: 2024-03-01 00:03:18
+ * @LastEditTime: 2024-03-12 18:51:43
  * @Description:
  * @FilePath: \vscode programd:\vscode\goWorker\src\douyin\video-rpc\pkg\dao\video_init.go
  */
@@ -11,6 +11,7 @@ package dao
 import (
 	"douyin/video-rpc/pkg/parse"
 	"fmt"
+	"sync"
 
 	"github.com/go-redis/redis"
 	"gorm.io/driver/mysql"
@@ -18,7 +19,8 @@ import (
 )
 
 var (
-	videoDb *gorm.DB
+	videoDb   *gorm.DB
+	onceMySQL *sync.Once
 )
 
 type Video struct {
@@ -39,27 +41,28 @@ type Video struct {
  * @return
  */
 func Init() {
-	var err error
+	var (
+		err      error
+		username = parse.ConfigStructure.Mysql.Username // 使用者名字 如root
+		password = parse.ConfigStructure.Mysql.Password
+		host     = parse.ConfigStructure.Mysql.Host
+		port     = parse.ConfigStructure.Mysql.Port
+		dbname   = "video" // 数据库名字
+		dsn      = fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", username, password, host, port, dbname)
+	)
 
-	username := parse.ConfigStructure.Mysql.Username // 使用者名字 如root
-	password := parse.ConfigStructure.Mysql.Password
-	host := parse.ConfigStructure.Mysql.Host
-	port := parse.ConfigStructure.Mysql.Port
-	dbname := "video" // 数据库名字
-
-	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", username, password, host, port, dbname)
-
-	videoDb, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-
-	if err != nil {
-		panic(err)
-	}
-
-	videoDb.AutoMigrate(&Video{})
+	onceMySQL.Do(func() {
+		videoDb, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+		if err != nil {
+			panic(err)
+		}
+		videoDb.AutoMigrate(&Video{})
+	})
 }
 
 var (
-	redisDB *redis.Client
+	redisDB   *redis.Client
+	onceRedis *sync.Once
 )
 
 /**
@@ -70,10 +73,12 @@ var (
  */
 func InitRedis() {
 	var err error
-	redisDB = redis.NewClient(&redis.Options{
-		Addr:     parse.ConfigStructure.Redis.Address,
-		Password: parse.ConfigStructure.Redis.Password,
-		DB:       0,
+	onceRedis.Do(func() {
+		redisDB = redis.NewClient(&redis.Options{
+			Addr:     parse.ConfigStructure.Redis.Address,
+			Password: parse.ConfigStructure.Redis.Password,
+			DB:       0,
+		})
 	})
 
 	_, err = redisDB.Ping().Result()
