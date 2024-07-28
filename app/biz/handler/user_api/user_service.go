@@ -6,6 +6,8 @@ import (
 	"context"
 
 	user_api "douyin/app/biz/model/user_api"
+	"douyin/common/dao"
+
 	"github.com/cloudwego/hertz/pkg/app"
 	"github.com/cloudwego/hertz/pkg/protocol/consts"
 )
@@ -23,6 +25,13 @@ func Register(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(user_api.RegisterResp)
 
+	user, err := dao.DefaultDao.UserDao.Create()
+	if err != nil {
+		c.String(consts.StatusBadRequest, "fail to create user")
+	}
+	resp.StatusCode = 0
+	resp.StatusMsg = "OK"
+	resp.UserID = user.ID
 	c.JSON(consts.StatusOK, resp)
 }
 
@@ -39,21 +48,22 @@ func Userinfo(ctx context.Context, c *app.RequestContext) {
 
 	resp := new(user_api.UserinfoResp)
 
-	c.JSON(consts.StatusOK, resp)
-}
-
-// Login .
-// @router /douyin/user/login [POST]
-func Login(ctx context.Context, c *app.RequestContext) {
-	var err error
-	var req user_api.LoginReq
-	err = c.BindAndValidate(&req)
+	user, err := dao.DefaultDao.FirstByID(req.UserID)
 	if err != nil {
-		c.String(consts.StatusBadRequest, err.Error())
+		c.String(consts.StatusBadRequest, "could not found userinfo")
 		return
 	}
 
-	resp := new(user_api.LoginResp)
-
+	resp.StatusCode = 1
+	resp.StatusMsg = "OK"
+	resp.User = &user_api.User{
+		ID:             user.ID,
+		FollowCount:    user.FollowCount,
+		FansCount:      user.FansCount,
+		WorkCount:      user.WorkCount,
+		FavoriteCount:  user.FavoriteCount,
+		TotalFavorited: user.TotalFavorited,
+		// TODO: IsFollow
+	}
 	c.JSON(consts.StatusOK, resp)
 }

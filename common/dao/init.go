@@ -6,9 +6,15 @@ import (
 	"time"
 
 	"github.com/go-redis/redis"
+	"github.com/google/uuid"
 	"gorm.io/driver/mysql"
 	"gorm.io/gorm"
 )
+
+type defaultDao struct {
+	UserDao
+	VideoDao
+}
 
 var (
 	DatabasePool map[string]*gorm.DB
@@ -16,6 +22,10 @@ var (
 	CacheDB *redis.Client
 
 	randnum = rand.New(rand.NewSource(time.Now().UnixNano()))
+
+	DefaultDao = defaultDao{}
+
+	uuid1 = uuid.New()
 )
 
 func Init() {
