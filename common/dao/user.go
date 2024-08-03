@@ -21,12 +21,19 @@ type User struct {
 	TotalFavorited int64
 }
 
+var DefaultUser = UserDao{}
+
 type UserDao struct{}
+
+func (u UserDao) Init() {
+	database := DatabasePool["test"].DB
+	database.AutoMigrate(&User{})
+}
 
 func (u UserDao) Create() (*User, error) {
 	var (
 		err      error
-		database = DatabasePool["test"]
+		database = DatabasePool["test"].DB
 		user     = new(User)
 	)
 	if err = database.Create(user).Error; err != nil {
@@ -45,7 +52,7 @@ func (u UserDao) FirstByID(user_id int64) (*User, error) {
 	var (
 		err      error
 		user     = new(User)
-		database = DatabasePool["test"]
+		database = DatabasePool["test"].DB
 	)
 	if user, err = u.FirstByIDCache(user_id); err == nil {
 		return user, nil
@@ -71,7 +78,7 @@ func (u UserDao) FirstByID(user_id int64) (*User, error) {
 func (u UserDao) IncWorkCount(user_id int64) error {
 	var (
 		err      error
-		database = DatabasePool["test"]
+		database = DatabasePool["test"].DB
 		cache    = CacheDB
 	)
 	if err = cache.Get(fmt.Sprintf("work_count_%v", user_id)).Err(); err != nil {
@@ -96,7 +103,7 @@ func (u UserDao) IncWorkCount(user_id int64) error {
 func (u UserDao) IncFavoriteCount(user_id int64) error {
 	var (
 		err      error
-		database = DatabasePool["test"]
+		database = DatabasePool["test"].DB
 		cache    = CacheDB
 	)
 	if err = cache.Get(fmt.Sprintf("favorite_count_%v", user_id)).Err(); err != nil {
@@ -120,7 +127,7 @@ func (u UserDao) IncFavoriteCount(user_id int64) error {
 func (u UserDao) IncFollowCount(user_id int64) error {
 	var (
 		err      error
-		database = DatabasePool["test"]
+		database = DatabasePool["test"].DB
 		cache    = CacheDB
 	)
 	if err = cache.Get(fmt.Sprintf("follow_count_%v", user_id)).Err(); err != nil {
@@ -144,7 +151,7 @@ func (u UserDao) IncFollowCount(user_id int64) error {
 func (u UserDao) IncFansCount(user_id int64) error {
 	var (
 		err      error
-		database = DatabasePool["test"]
+		database = DatabasePool["test"].DB
 		cache    = CacheDB
 	)
 	if err = cache.Get(fmt.Sprintf("fans_count_%v", user_id)).Err(); err != nil {

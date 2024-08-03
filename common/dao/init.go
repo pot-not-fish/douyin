@@ -11,50 +11,49 @@ import (
 	"gorm.io/gorm"
 )
 
-type defaultDao struct {
-	UserDao
-	VideoDao
-}
-
 var (
-	DatabasePool map[string]*gorm.DB
-
-	CacheDB *redis.Client
-
 	randnum = rand.New(rand.NewSource(time.Now().UnixNano()))
-
-	DefaultDao = defaultDao{}
 
 	uuid1 = uuid.New()
 )
 
-func Init() {
+var (
+	DatabasePool map[string]*MySQLConn
+)
+
+type MySQLConn struct {
+	DB *gorm.DB
+}
+
+func MySQLConnInit(dbname string) (*MySQLConn, error) {
 	var err error
-
-	// mysql连接池初始化
-	DatabasePool = make(map[string]*gorm.DB)
-	// 分库test-1 test-2 test-3
-	for i := 1; i <= 3; i++ {
-		username := MySQLConfig.Username
-		password := MySQLConfig.Password
-		host := MySQLConfig.Host
-		port := MySQLConfig.Port
-		dbname := fmt.Sprintf("test-%d", i)
-		dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", username, password, host, port, dbname)
-		DatabasePool[dbname], err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
-		if err != nil {
-			panic(err)
-		}
+	mysqlConn := new(MySQLConn)
+	username := "root"
+	password := "123456"
+	host := "127.0.0.1"
+	port := 3306
+	dsn := fmt.Sprintf("%s:%s@tcp(%s:%d)/%s?charset=utf8&parseTime=True&loc=Local", username, password, host, port, dbname)
+	mysqlConn.DB, err = gorm.Open(mysql.Open(dsn), &gorm.Config{})
+	if err != nil {
+		return nil, err
 	}
+	return mysqlConn, nil
+}
 
-	// redis连接初始化
+var (
+	CacheDB *redis.Client
+)
+
+func CacheInit() error {
+	var err error
 	CacheDB = redis.NewClient(&redis.Options{
-		Addr:     RedisConfig.Address,
-		Password: RedisConfig.Password,
+		Addr:     "127.0.0.1:6379",
+		Password: "",
 		DB:       0,
 	})
 	_, err = CacheDB.Ping().Result()
 	if err != nil {
-		panic(err)
+		return err
 	}
+	return nil
 }
